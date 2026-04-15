@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalhes do Produto | Giacomini</title>
+    <style>
+        :root { --verde: #166E36; --verde-escuro: #0E4722; --fundo: #F4F7F5; --texto: #333; --branco: #FFF; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background-color: var(--fundo); color: var(--texto); }
+
+        header { background: var(--branco); padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
+        .logo-pequena { height: 40px; }
+        .btn-header { background: none; border: none; font-size: 1.2em; cursor: pointer; color: var(--verde); font-weight: bold; text-decoration: none;}
+        
+        .gaveta { position: fixed; top: 0; height: 100vh; width: 320px; background: var(--branco); box-shadow: 0 0 20px rgba(0,0,0,0.5); z-index: 2000; transition: 0.3s; padding: 20px; display: flex; flex-direction: column; right: -340px; }
+        .gaveta.aberto { right: 0; }
+        .gaveta-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 15px; }
+        .btn-fechar { background: #ff4d4d; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        #overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); z-index: 1500; }
+
+        #lista-carrinho { flex: 1; overflow-y: auto; list-style: none; }
+        .item-carrinho { display: flex; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
+        .btn-finalizar { background: var(--verde); color: white; border: none; padding: 15px; border-radius: 4px; font-weight: bold; text-transform: uppercase; cursor: pointer; width: 100%; margin-top: 20px; }
+        
+        .container-produto { max-width: 1000px; margin: 50px auto; background: var(--branco); padding: 40px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); display: flex; gap: 40px; }
+        .foto-produto { flex: 1; background: #eee; border-radius: 8px; min-height: 400px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .foto-produto img { width: 100%; height: 100%; object-fit: cover; }
+        .info-produto { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+        .info-produto h1 { font-size: 2.2em; color: var(--verde-escuro); margin-bottom: 10px; }
+        .info-produto .preco { font-size: 2.5em; color: var(--verde); font-weight: 900; margin-bottom: 20px; }
+        .info-produto p { font-size: 1.1em; color: #555; line-height: 1.6; margin-bottom: 30px; background: #f9f9f9; padding: 15px; border-left: 4px solid var(--verde); }
+        .btn-add { background: var(--verde); color: white; border: none; padding: 18px; border-radius: 4px; font-size: 1.2em; font-weight: bold; cursor: pointer; text-transform: uppercase; transition: 0.3s; }
+        
+        .grid-relacionados { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
+        .cartao-rel { background: white; padding: 15px; border-radius: 8px; border: 1px solid #eee; text-align: center; }
+
+        @media (max-width: 768px) { .container-produto { flex-direction: column; padding: 20px; } }
+    </style>
+</head>
+<body>
+
+    <div id="overlay" onclick="fecharCarrinho()"></div>
+
+    <div id="carrinho-lateral" class="gaveta">
+        <div class="gaveta-header">
+            <h2 style="color: var(--verde);">🛒 Carrinho</h2>
+            <button class="btn-fechar" onclick="fecharCarrinho()">X</button>
+        </div>
+        <ul id="lista-carrinho"></ul>
+        <h3 style="text-align: right; margin: 15px 0;">Total: R$ <span id="total-carrinho">0,00</span></h3>
+        <button class="btn-finalizar" onclick="finalizarCompra()">Finalizar no WhatsApp</button>
+    </div>
+
+    <header>
+        <a href="catalogo.html" class="btn-header">← Voltar</a>
+        <a href="index.html"><img src="images.jfif" alt="Logo" class="logo-pequena"></a>
+        <button class="btn-header" onclick="abrirCarrinho()">🛒 <span id="contagem-carrinho" style="background:var(--verde); color:white; padding:2px 8px; border-radius:20px; font-size:0.8em;">0</span></button>
+    </header>
+
+    <div class="container-produto">
+        <div class="foto-produto">
+            <img src="images.jfif" alt="Produto" id="img-produto" onerror="this.src='images.jfif'">
+        </div>
+        <div class="info-produto">
+            <h1 id="titulo-produto">Carregando...</h1>
+            <div class="preco" id="preco-produto">R$ 0,00</div>
+            <p>Produto garantido pela Giacomini Manutenção. Oferecemos peças de alta durabilidade e revisão completa para o seu equipamento não parar.</p>
+            <button class="btn-add" onclick="adicionarEsteProduto()">Adicionar ao Carrinho</button>
+        </div>
+    </div>
+
+    <div style="max-width: 1000px; margin: 50px auto; padding: 0 20px;">
+        <h2 style="color: var(--verde-escuro); margin-bottom: 20px; border-left: 4px solid var(--verde); padding-left: 10px;">Clientes também compraram:</h2>
+        <div class="grid-relacionados" id="grid-relacionados">
+            </div>
+    </div>
+
+    <script>
+        // ===> COLOQUE O SEU LINK DA PLANILHA AQUI <===
+        const URL_PLANILHA = 'COLE_AQUI_O_LINK_DO_PASSO_1_ITEM_6';
+
+        const params = new URLSearchParams(window.location.search);
+        const nomeProd = params.get('nome') || 'Produto não encontrado';
+        const precoProd = parseFloat(params.get('preco')) || 0.00;
+        const imgProd = params.get('img') || 'images.jfif';
+
+        document.getElementById('titulo-produto').innerText = nomeProd;
+        document.getElementById('preco-produto').innerText = "R$ " + precoProd.toFixed(2).replace('.', ',');
+        document.getElementById('img-produto').src = imgProd;
+
+        let carrinho = JSON.parse(localStorage.getItem('carrinhoGiacomini')) || [];
+
+        function adicionarEsteProduto() {
+            if(precoProd > 0) {
+                carrinho.push({ nome: nomeProd, preco: precoProd });
+                localStorage.setItem('carrinhoGiacomini', JSON.stringify(carrinho));
+                atualizarCarrinho();
+                abrirCarrinho();
+            }
+        }
+
+        function removerDoCarrinho(index) {
+            carrinho.splice(index, 1);
+            localStorage.setItem('carrinhoGiacomini', JSON.stringify(carrinho));
+            atualizarCarrinho();
+        }
+
+        function atualizarCarrinho() {
+            const lista = document.getElementById('lista-carrinho');
+            const totalSpan = document.getElementById('total-carrinho');
+            document.getElementById('contagem-carrinho').innerText = carrinho.length;
+            lista.innerHTML = '';
+            let total = 0;
+
+            if (carrinho.length === 0) lista.innerHTML = '<p style="text-align:center; color:#888;">Carrinho vazio.</p>';
+
+            carrinho.forEach((item, index) => {
+                total += item.preco;
+                lista.innerHTML += `
+                    <li class="item-carrinho">
+                        <div><strong>${item.nome}</strong><br><span style="color:var(--verde)">R$ ${item.preco.toFixed(2).replace('.', ',')}</span></div>
+                        <button onclick="removerDoCarrinho(${index})" style="background:none; border:none; color:red; cursor:pointer; font-size: 1.2em;">✕</button>
+                    </li>`;
+            });
+            totalSpan.innerText = total.toFixed(2).replace('.', ',');
+        }
+
+        function finalizarCompra() {
+            if (carrinho.length === 0) return alert("Adicione itens ao carrinho!");
+            let texto = "Olá, Giacomini Manutenção! Gostaria de fechar o pedido do meu carrinho:%0A%0A";
+            carrinho.forEach(i => { texto += `- ${i.nome} (R$ ${i.preco.toFixed(2).replace('.', ',')})%0A`; });
+            texto += `%0A*Total: R$ ${document.getElementById('total-carrinho').innerText}*`;
+            window.open(`https://wa.me/5547989050263?text=${texto}`, '_blank');
+        }
+
+        function abrirCarrinho() { document.getElementById('carrinho-lateral').classList.add('aberto'); document.getElementById('overlay').style.display = 'block'; }
+        function fecharCarrinho() { document.getElementById('carrinho-lateral').classList.remove('aberto'); document.getElementById('overlay').style.display = 'none'; }
+
+        // Carrega produtos relacionados da planilha
+        async function carregarRelacionados() {
+            try {
+                const resposta = await fetch(URL_PLANILHA);
+                const dadosTexto = await resposta.text();
+                const linhas = dadosTexto.split(/\r?\n/).filter(linha => linha.trim() !== "").slice(1); 
+
+                let produtos = linhas.map(linha => {
+                    const colunas = linha.split(',');
+                    if(!colunas[0] || !colunas[1]) return null;
+                    return {
+                        nome: colunas[0].trim(),
+                        preco: parseFloat(colunas[1]) || 0,
+                        img: (colunas[3] || "").trim(),
+                        estoque: parseInt(colunas[4]) || 0
+                    };
+                }).filter(p => p !== null && p.nome !== "" && p.nome !== nomeProd && p.estoque > 0);
+
+                const relacionados = produtos.slice(0, 2); // Pega 2 diferentes
+                const grid = document.getElementById('grid-relacionados');
+                grid.innerHTML = '';
+
+                relacionados.forEach(p => {
+                    let caminhoImg = p.img || 'images.jfif';
+                    if (caminhoImg !== 'images.jfif' && !caminhoImg.startsWith('img/') && !caminhoImg.startsWith('http')) caminhoImg = 'img/' + caminhoImg;
+
+                    grid.innerHTML += `
+                        <div class="cartao-rel">
+                            <img src="${caminhoImg}" style="width: 100%; height: 150px; object-fit: cover; border-radius: 4px; margin-bottom: 10px;" onerror="this.src='images.jfif'">
+                            <h4 style="font-size: 1em; color: #444; margin-bottom: 5px;">${p.nome}</h4>
+                            <div style="color: var(--verde); font-weight: bold; font-size: 1.2em; margin-bottom: 10px;">R$ ${p.preco.toFixed(2).replace('.', ',')}</div>
+                            <a href="produto.html?nome=${encodeURIComponent(p.nome)}&preco=${p.preco}&img=${encodeURIComponent(caminhoImg)}" style="background: #eee; color: #333; text-decoration: none; display: block; padding: 8px; border-radius: 4px; font-weight: bold;">Ver Produto</a>
+                        </div>
+                    `;
+                });
+            } catch (e) { console.log("Erro ao carregar relacionados"); }
+        }
+
+        window.onload = () => { atualizarCarrinho(); carregarRelacionados(); };
+    </script>
+</body>
+</html>

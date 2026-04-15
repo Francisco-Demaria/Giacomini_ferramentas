@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quem Somos | Giacomini</title>
+    <style>
+        :root { --verde: #166E36; --verde-escuro: #0E4722; --fundo: #F4F7F5; --texto: #333; --branco: #FFF; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background-color: var(--fundo); color: var(--texto); }
+
+        header { background: var(--branco); padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .logo-pequena { height: 40px; }
+        .btn-header { background: none; border: none; font-size: 1.1em; cursor: pointer; color: var(--verde); font-weight: bold; text-decoration: none; }
+
+        .banner-sobre { background: linear-gradient(rgba(22, 110, 54, 0.9), rgba(14, 71, 34, 0.9)), url('images.jfif') center/cover; padding: 80px 20px; text-align: center; color: white; }
+        .banner-sobre h1 { font-size: 3em; text-transform: uppercase; margin-bottom: 10px; }
+
+        .container { max-width: 900px; margin: 50px auto; padding: 0 20px; line-height: 1.8; font-size: 1.1em; }
+        .texto-destaque { font-size: 1.3em; color: var(--verde-escuro); font-weight: bold; text-align: center; margin-bottom: 40px; }
+        
+        .grid-valores { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 50px; }
+        .valor-card { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-top: 4px solid var(--verde); }
+        .valor-card h3 { color: var(--verde); margin-bottom: 15px; font-size: 1.3em; }
+
+        @media (max-width: 600px) { .grid-valores { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="index.html" class="btn-header">← Voltar à Loja</a>
+        <img src="images.jfif" alt="Logo" class="logo-pequena">
+        <div style="width: 80px;"></div>
+    </header>
+
+    <div class="banner-sobre">
+        <h1>Quem Somos</h1>
+        <p>A força por trás do reparo das suas ferramentas.</p>
+    </div>
+
+    <div class="container">
+        <p class="texto-destaque">"Na Giacomini Manutenção, sabemos que o tempo da sua obra ou indústria vale ouro. Se a máquina para, o trabalho para. Nosso objetivo é fazer ela voltar a funcionar como nova."</p>
+
+        <p>Localizada em Joinville/SC, a <strong>Giacomini Manutenção</strong> nasceu com o propósito de oferecer assistência técnica especializada, justa e de alta qualidade para ferramentas elétricas.</p>
+        <p>Trabalhamos com consertos, revisões preventivas e venda de peças de reposição para as principais marcas do mercado: Makita, Bosch, DeWalt, Skil, Vonder, entre outras.</p>
+
+        <div class="grid-valores">
+            <div class="valor-card">
+                <h3>🛠️ Especialização Técnica</h3>
+                <p>Nossa equipe possui conhecimento profundo em motores elétricos, induzidos e engrenagens. Não fazemos "gambiarra", fazemos manutenção de verdade.</p>
+            </div>
+            <div class="valor-card">
+                <h3>⚡ Agilidade</h3>
+                <p>Com um amplo estoque de peças (de escovas de carvão a rolamentos), garantimos um orçamento rápido pelo WhatsApp e entrega ágil do serviço.</p>
+            </div>
+            <div class="valor-card">
+                <h3>🛡️ Garantia</h3>
+                <p>Utilizamos peças originais e de primeira linha. Todo serviço executado sai da nossa oficina testado e com garantia de funcionamento.</p>
+            </div>
+            <div class="valor-card">
+                <h3>🤝 Atendimento</h3>
+                <p>Tratamos nossos clientes como parceiros. Transparência no orçamento e honestidade no diagnóstico do seu equipamento.</p>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

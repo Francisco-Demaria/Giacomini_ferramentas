@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo | Giacomini Manutenção</title>
+    <style>
+        :root { --verde: #166E36; --fundo: #F4F7F5; --texto: #333; --branco: #FFF; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background-color: var(--fundo); color: var(--texto); padding-bottom: 50px; }
+
+        header { background: var(--branco); padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
+        .logo-pequena { height: 40px; }
+        .btn-header { background: none; border: none; font-size: 1.1em; cursor: pointer; color: var(--verde); font-weight: bold; text-decoration: none; }
+        
+        .busca-container { background: white; padding: 30px 20px; text-align: center; border-bottom: 1px solid #ddd; }
+        .search-box { width: 100%; max-width: 600px; padding: 15px; border: 2px solid #ddd; border-radius: 30px; font-size: 1.1em; outline: none; }
+        .search-box:focus { border-color: var(--verde); }
+
+        .grid-catalogo { max-width: 1200px; margin: 40px auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; padding: 0 20px; }
+        
+        .cartao-mini { background: white; padding: 15px; border-radius: 8px; border: 1px solid #eee; text-align: center; display: flex; flex-direction: column; justify-content: space-between; position: relative; }
+        .cartao-mini img { width: 100%; height: 150px; object-fit: cover; border-radius: 4px; background: #fafafa; margin-bottom: 10px; }
+        .cartao-mini h4 { font-size: 1em; color: #444; margin-bottom: 10px; }
+        .cartao-mini .preco { color: var(--verde); font-weight: bold; font-size: 1.3em; margin-bottom: 5px; }
+        .estoque-info { font-size: 0.85em; color: #666; margin-bottom: 15px; font-weight: bold; }
+        
+        .btn-comprar { background: #25D366; color: white; text-decoration: none; display: block; padding: 10px; border-radius: 4px; font-weight: bold; cursor: pointer; border: none; width: 100%; }
+        .btn-comprar:hover { background: #128C7E; }
+        .btn-esgotado { background: #ccc; cursor: not-allowed; color: #666; }
+        .esgotado-tag { position: absolute; top: 10px; right: 10px; background: #ff4d4d; color: white; padding: 5px 10px; border-radius: 4px; font-weight: bold; font-size: 0.8em; z-index: 10; }
+
+        .btn-zap-flutuante { position: fixed; bottom: 30px; right: 30px; background: #25D366; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 999; }
+        .btn-zap-flutuante img { width: 30px; filter: invert(1); }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="index.html" class="btn-header">← Voltar</a>
+        <img src="images.jfif" alt="Logo" class="logo-pequena">
+        <span style="font-weight: bold; color: var(--verde);">Catálogo</span>
+    </header>
+
+    <div class="busca-container">
+        <input type="text" id="inputBusca" class="search-box" placeholder="Pesquisar ferramentas, peças..." onkeyup="renderizar()">
+    </div>
+
+    <div class="grid-catalogo" id="grid-produtos">
+        <p style="text-align: center; grid-column: 1/-1; font-size: 1.2em; color: #666;">Conectando ao estoque... Aguarde.</p>
+    </div>
+
+    <a href="https://wa.me/5547989050263" class="btn-zap-flutuante" target="_blank">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp">
+    </a>
+
+    <script>
+        // ===> COLOQUE O SEU LINK DA PLANILHA AQUI <===
+        const URL_PLANILHA = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSjwdcNetNoRZzXi20wyCVlMwhQf86ckoI8ZcIDui7wnvQpxUg7NIAio6HEu_CMHqyG1yT4Rcee_q6H/pub?output=csv';
+
+        let produtosAtuais = [];
+
+        async function carregarDados() {
+            try {
+                const resposta = await fetch(URL_PLANILHA);
+                const dadosTexto = await resposta.text();
+                
+                // Remove linhas completamente vazias
+                const linhas = dadosTexto.split(/\r?\n/).filter(linha => linha.trim() !== "");
+                const dadosSemCabecalho = linhas.slice(1); 
+
+                produtosAtuais = dadosSemCabecalho.map(linha => {
+                    const colunas = linha.split(',');
+                    if(!colunas[0] || !colunas[1]) return null;
+
+                    return {
+                        nome: colunas[0].trim(),
+                        preco: parseFloat(colunas[1]) || 0,
+                        cat: (colunas[2] || "").trim(),
+                        img: (colunas[3] || "").trim(),
+                        estoque: parseInt(colunas[4]) || 0
+                    };
+                }).filter(p => p !== null && p.nome !== ""); 
+
+                renderizar();
+            } catch (erro) {
+                document.getElementById('grid-produtos').innerHTML = "<p style='text-align:center; grid-column:1/-1; color:red;'>Erro ao carregar os produtos da planilha.</p>";
+            }
+        }
+
+        function renderizar() {
+            const grid = document.getElementById('grid-produtos');
+            const busca = document.getElementById('inputBusca').value.toLowerCase();
+            grid.innerHTML = '';
+
+            if (produtosAtuais.length === 0) {
+                grid.innerHTML = "<p style='text-align:center; grid-column:1/-1;'>Nenhum produto cadastrado na planilha.</p>";
+                return;
+            }
+
+            produtosAtuais.forEach(p => {
+                if (p.nome.toLowerCase().includes(busca)) {
+                    const estaEsgotado = p.estoque <= 0;
+                    
+                    // Inteligência da Imagem
+                    let caminhoImg = p.img || 'images.jfif';
+                    if (caminhoImg !== 'images.jfif' && !caminhoImg.startsWith('img/') && !caminhoImg.startsWith('http')) {
+                        caminhoImg = 'img/' + caminhoImg;
+                    }
+                    
+                    grid.innerHTML += `
+                        <div class="cartao-mini">
+                            ${estaEsgotado ? '<div class="esgotado-tag">ESGOTADO</div>' : ''}
+                            <img src="${caminhoImg}" alt="${p.nome}" onerror="this.src='images.jfif'">
+                            <h4>${p.nome}</h4>
+                            <div class="preco">R$ ${p.preco.toFixed(2).replace('.', ',')}</div>
+                            <div class="estoque-info">${estaEsgotado ? 'Sem estoque' : 'Estoque: ' + p.estoque + ' un'}</div>
+                            
+                            ${estaEsgotado 
+                                ? '<button class="btn-comprar btn-esgotado" disabled>Indisponível</button>' 
+                                : `<a href="produto.html?nome=${encodeURIComponent(p.nome)}&preco=${p.preco}&img=${encodeURIComponent(caminhoImg)}" class="btn-comprar" style="background: var(--verde);">Ver Detalhes</a>`
+                            }
+                        </div>
+                    `;
+                }
+            });
+        }
+
+        window.onload = carregarDados;
+    </script>
+</body>
+</html>

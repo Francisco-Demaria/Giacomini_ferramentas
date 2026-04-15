@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giacomini Manutenção | Ferramentas Elétricas</title>
+    <style>
+        :root { --verde-logo: #166E36; --verde-escuro: #0E4722; --fundo: #F4F7F5; --branco: #FFFFFF; --texto: #333; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; scroll-behavior: smooth; }
+        body { background-color: var(--fundo); color: var(--texto); overflow-x: hidden; }
+
+        header { background: var(--branco); padding: 10px 5%; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 1000; }
+        .btn-header { background: none; border: none; font-size: 1.5em; cursor: pointer; color: var(--verde-logo); font-weight: bold; }
+        .logo-container { display: flex; align-items: center; gap: 15px; text-decoration: none; }
+        .logo-img { height: 55px; border-radius: 5px; }
+        .logo-nome { color: var(--verde-logo); font-weight: 900; font-size: 1.4em; text-transform: uppercase; line-height: 1; }
+
+        .gaveta { position: fixed; top: 0; height: 100vh; width: 300px; background: var(--branco); box-shadow: 0 0 20px rgba(0,0,0,0.5); z-index: 2000; transition: 0.3s; padding: 20px; display: flex; flex-direction: column; left: -320px; }
+        .gaveta.aberto { left: 0; }
+        .gaveta-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 15px; }
+        .btn-fechar { background: #ff4d4d; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .menu-links { display: flex; flex-direction: column; gap: 15px; flex: 1; }
+        .menu-links a { text-decoration: none; color: var(--texto); font-size: 1.2em; font-weight: bold; padding: 10px; border-radius: 5px; transition: 0.2s; }
+        .menu-links a:hover { background: #eee; color: var(--verde-logo); padding-left: 15px; }
+        #overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); z-index: 1500; }
+
+        .hero { background: linear-gradient(rgba(22, 110, 54, 0.9), rgba(14, 71, 34, 0.9)), url('images.jfif') center/cover; color: white; text-align: center; padding: 100px 20px; }
+        .hero h1 { font-size: 3em; margin-bottom: 10px; text-transform: uppercase; }
+        .hero p { font-size: 1.2em; opacity: 0.9; }
+
+        .secao { max-width: 1200px; margin: 60px auto; padding: 0 20px; }
+        .titulo-secao { font-size: 2em; color: var(--verde-escuro); margin-bottom: 30px; text-align: center; text-transform: uppercase; border-bottom: 3px solid var(--verde-logo); display: inline-block; padding-bottom: 10px; }
+
+        .grid-destaques { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px; margin-top: 20px; }
+        .cartao-destaque { background: white; border: 1px solid #ddd; border-radius: 8px; padding: 20px; text-align: center; transition: 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.02); display: flex; flex-direction: column; justify-content: space-between;}
+        .cartao-destaque:hover { box-shadow: 0 8px 25px rgba(0,0,0,0.1); transform: translateY(-5px); border-color: var(--verde-logo); }
+        .cartao-destaque img { width: 100%; height: 180px; object-fit: cover; border-radius: 4px; margin-bottom: 15px; }
+        .cartao-destaque h3 { font-size: 1.1em; color: #333; margin-bottom: 10px; }
+        .btn-ver { background: var(--verde-logo); color: white; text-decoration: none; display: block; padding: 12px; border-radius: 4px; font-weight: bold; text-transform: uppercase; margin-top: 15px; }
+        .btn-ver:hover { background: var(--verde-escuro); }
+
+        .quem-somos-card { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center; line-height: 1.8; border-top: 5px solid var(--verde-logo); font-size: 1.1em; }
+        .btn-zap-flutuante { position: fixed; bottom: 30px; right: 30px; background: #25D366; width: 65px; height: 65px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 999; transition: 0.3s; }
+        .btn-zap-flutuante:hover { transform: scale(1.1); background: #128C7E; }
+        .btn-zap-flutuante img { width: 35px; filter: invert(1); }
+
+        footer { background: var(--verde-escuro); color: white; padding: 50px 20px; text-align: center; }
+        .social-links { display: flex; justify-content: center; flex-wrap: wrap; gap: 15px; margin: 20px 0; }
+        .social-links a { color: white; text-decoration: none; padding: 10px 25px; border: 2px solid white; border-radius: 30px; font-weight: bold; transition: 0.3s; display: flex; align-items: center; gap: 8px; }
+        .social-links a:hover { background: white; color: var(--verde-escuro); }
+    </style>
+</head>
+<body>
+
+    <div id="overlay" onclick="fecharMenu()"></div>
+
+    <nav id="menu-lateral" class="gaveta">
+        <div class="gaveta-header">
+            <h2 style="color: var(--verde-logo);">Menu</h2>
+            <button class="btn-fechar" onclick="fecharMenu()">X</button>
+        </div>
+        <div class="menu-links">
+            <a href="index.html">🏠 Início</a>
+            <a href="sobre.html">📖 Quem Somos</a>
+            <a href="catalogo.html">🛒 Catálogo Completo</a>
+        </div>
+        <div style="border-top: 1px solid #ddd; padding-top: 20px; margin-top: 20px;">
+            <p style="color: #666; margin-bottom: 10px; font-size: 0.9em;">Fale Conosco:</p>
+            <a href="https://wa.me/5547989050263" target="_blank" style="color: #25D366; display: block; margin-bottom: 10px; font-weight: bold; text-decoration: none;">💬 WhatsApp</a>
+            <a href="https://instagram.com/SEU_INSTAGRAM" target="_blank" style="color: #E1306C; display: block; margin-bottom: 10px; font-weight: bold; text-decoration: none;">📸 Instagram</a>
+            <a href="https://facebook.com/SEU_FACEBOOK" target="_blank" style="color: #4267B2; display: block; font-weight: bold; text-decoration: none;">📘 Facebook</a>
+        </div>
+    </nav>
+
+    <header>
+        <button class="btn-header" onclick="abrirMenu()">☰</button>
+        <a href="index.html" class="logo-container">
+            <img src="images.jfif" alt="Logo Giacomini" class="logo-img">
+            <div class="logo-nome">Giacomini<br><span style="font-size: 0.7em; opacity: 0.8;">Manutenção</span></div>
+        </a>
+        <div style="width: 30px;"></div>
+    </header>
+
+    <div class="hero">
+        <h1>Força e Precisão</h1>
+        <p>Venda de peças, acessórios e manutenção especializada em Joinville/SC.</p>
+    </div>
+
+    <section class="secao">
+        <div style="text-align: center;">
+            <h2 class="titulo-secao">Destaques da Semana</h2>
+        </div>
+        <div class="grid-destaques" id="grid-destaques">
+            <p style="text-align: center; width: 100%; color: #666;">Carregando produtos em destaque...</p>
+        </div>
+        <div style="text-align: center; margin-top: 40px;">
+            <a href="catalogo.html" style="color: var(--verde-logo); font-weight: bold; font-size: 1.2em; text-decoration: none; padding: 10px 20px; border: 2px solid var(--verde-logo); border-radius: 30px; transition: 0.3s;">VER CATÁLOGO COMPLETO ➔</a>
+        </div>
+    </section>
+
+    <a href="https://wa.me/5547989050263" class="btn-zap-flutuante" target="_blank">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp">
+    </a>
+
+    <section class="secao">
+        <div style="text-align: center;">
+            <h2 class="titulo-secao">Quem Somos</h2>
+        </div>
+        <div class="quem-somos-card">
+            <p>A <strong>Giacomini Manutenção</strong> é especialista no conserto e revisão de ferramentas elétricas. Trabalhamos com as melhores marcas do mercado, oferecendo peças de reposição originais e de alta durabilidade.</p>
+            <div style="text-align: center; margin-top: 25px;">
+                <a href="sobre.html" style="background: var(--verde-logo); color: white; padding: 12px 25px; border-radius: 4px; text-decoration: none; font-weight: bold; display: inline-block;">Conheça Nossa História</a>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <h3>Giacomini Manutenção</h3>
+        <p style="margin-bottom: 20px;">Joinville/SC - Especialistas em Ferramentas Elétricas</p>
+        <div class="social-links">
+            <a href="https://wa.me/5547989050263" target="_blank">💬 WhatsApp</a>
+            <a href="https://www.instagram.com/giacominimanutencao/" target="_blank">📸 Instagram</a>
+            <a href="https://www.facebook.com/giacominimanutencao/" target="_blank">📘 Facebook</a>
+        </div>
+        <p style="font-size: 0.8em; opacity: 0.6; margin-top: 30px;">© 2026 Giacomini Manutenção. Todos os direitos reservados.</p>
+    </footer>
+
+    <script>
+        // ===> COLOQUE O SEU LINK DA PLANILHA AQUI <===
+        const URL_PLANILHA = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSjwdcNetNoRZzXi20wyCVlMwhQf86ckoI8ZcIDui7wnvQpxUg7NIAio6HEu_CMHqyG1yT4Rcee_q6H/pub?output=csv';
+
+        function abrirMenu() {
+            document.getElementById('menu-lateral').classList.add('aberto');
+            document.getElementById('overlay').style.display = 'block';
+        }
+        function fecharMenu() {
+            document.getElementById('menu-lateral').classList.remove('aberto');
+            document.getElementById('overlay').style.display = 'none';
+        }
+
+        // CARREGA DESTAQUES
+        async function carregarDestaques() {
+            try {
+                const resposta = await fetch(URL_PLANILHA);
+                const dadosTexto = await resposta.text();
+                
+                const linhas = dadosTexto.split(/\r?\n/).filter(linha => linha.trim() !== "");
+                const dadosSemCabecalho = linhas.slice(1); 
+
+                let produtos = dadosSemCabecalho.map(linha => {
+                    const colunas = linha.split(',');
+                    if(!colunas[0] || !colunas[1]) return null;
+                    return {
+                        nome: colunas[0].trim(),
+                        preco: parseFloat(colunas[1]) || 0,
+                        img: (colunas[3] || "").trim(),
+                        estoque: parseInt(colunas[4]) || 0
+                    };
+                }).filter(p => p !== null && p.nome !== "");
+
+                // Pega apenas os que tem estoque e separa os 3 primeiros
+                const destaques = produtos.filter(p => p.estoque > 0).slice(0, 3);
+                
+                const grid = document.getElementById('grid-destaques');
+                grid.innerHTML = '';
+
+                destaques.forEach(p => {
+                    // Inteligência da Imagem: arruma o caminho se faltar o img/
+                    let caminhoImg = p.img || 'images.jfif';
+                    if (caminhoImg !== 'images.jfif' && !caminhoImg.startsWith('img/') && !caminhoImg.startsWith('http')) {
+                        caminhoImg = 'img/' + caminhoImg;
+                    }
+
+                    grid.innerHTML += `
+                        <div class="cartao-destaque">
+                            <img src="${caminhoImg}" alt="${p.nome}" onerror="this.src='images.jfif'">
+                            <h3>${p.nome}</h3>
+                            <p style="color: var(--verde-logo); font-size: 1.3em; font-weight: bold;">R$ ${p.preco.toFixed(2).replace('.', ',')}</p>
+                            <a href="produto.html?nome=${encodeURIComponent(p.nome)}&preco=${p.preco}" class="btn-ver">Ver Produto</a>
+                        </div>
+                    `;
+                });
+
+                if(destaques.length === 0) grid.innerHTML = "<p style='width: 100%; text-align: center;'>Adicione produtos com estoque na planilha.</p>";
+
+            } catch (erro) {
+                document.getElementById('grid-destaques').innerHTML = "<p style='color:red; text-align:center; width:100%;'>Erro ao carregar os destaques da planilha.</p>";
+            }
+        }
+
+        window.onload = carregarDestaques;
+    </script>
+</body>
+</html>
