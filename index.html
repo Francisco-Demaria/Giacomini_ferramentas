@@ -288,7 +288,7 @@
                 document.getElementById('grid-destaques').innerHTML = produtos.slice(0, 4).map(criarCartao).join('');
                 
                 // Lançamentos (5 a 8)
-                let lancamentos = produtos.slice(4, 8);
+                let lancamentos = produtos.slice(-4).reverse();
                 document.getElementById('grid-lancamentos').innerHTML = lancamentos.length > 0 ? lancamentos.map(criarCartao).join('') : "<p style='width:100%; text-align:center;'>Nenhum lançamento recente.</p>";
                 
                 // Promoções (Filtra quem tem preço antigo maior que atual)
