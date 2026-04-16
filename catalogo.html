@@ -3,130 +3,128 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Catálogo | Giacomini Manutenção</title>
+    <title>Catálogo Completo | Giacomini</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --verde: #166E36; --fundo: #F4F7F5; --texto: #333; --branco: #FFF; }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background-color: var(--fundo); color: var(--texto); padding-bottom: 50px; }
+        :root { --verde-principal: #166e36; --verde-escuro: #0e4722; --verde-destaque: #1ebe5d; --grafite: #333333; --fundo: #f4f7f6; --branco: #FFFFFF; --texto: #444; --borda: #e5e5e5; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; }
+        body { background-color: var(--fundo); color: var(--texto); overflow-x: hidden; }
 
-        header { background: var(--branco); padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
-        .logo-pequena { height: 40px; }
-        .btn-header { background: none; border: none; font-size: 1.1em; cursor: pointer; color: var(--verde); font-weight: bold; text-decoration: none; }
+        header { background: var(--verde-principal); padding: 12px 5%; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 1000;}
+        .logo-container { display: flex; align-items: center; gap: 10px; text-decoration: none; margin: 0 auto;}
+        .logo-img { height: 45px; border-radius: 4px; border: 2px solid rgba(255,255,255,0.7); background: white; padding: 2px; }
+        .logo-texto { color: var(--branco); font-size: 1.5em; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; }
         
-        .busca-container { background: white; padding: 30px 20px; text-align: center; border-bottom: 1px solid #ddd; }
-        .search-box { width: 100%; max-width: 600px; padding: 15px; border: 2px solid #ddd; border-radius: 30px; font-size: 1.1em; outline: none; }
-        .search-box:focus { border-color: var(--verde); }
+        .icone-carrinho-topo { color: var(--branco); text-decoration: none; font-size: 1.4em; position: absolute; right: 5%; transition: 0.3s;}
+        .icone-carrinho-topo:hover { color: var(--verde-destaque); transform: scale(1.1); }
+        .badge-carrinho { position: absolute; top: -10px; right: -12px; background: #e74c3c; color: white; border-radius: 50%; padding: 3px 7px; font-size: 0.7em; font-weight: bold; border: 2px solid var(--verde-principal);}
 
-        .grid-catalogo { max-width: 1200px; margin: 40px auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; padding: 0 20px; }
-        
-        .cartao-mini { background: white; padding: 15px; border-radius: 8px; border: 1px solid #eee; text-align: center; display: flex; flex-direction: column; justify-content: space-between; position: relative; }
-        .cartao-mini img { width: 100%; height: 150px; object-fit: cover; border-radius: 4px; background: #fafafa; margin-bottom: 10px; }
-        .cartao-mini h4 { font-size: 1em; color: #444; margin-bottom: 10px; }
-        .cartao-mini .preco { color: var(--verde); font-weight: bold; font-size: 1.3em; margin-bottom: 5px; }
-        .estoque-info { font-size: 0.85em; color: #666; margin-bottom: 15px; font-weight: bold; }
-        
-        .btn-comprar { background: #25D366; color: white; text-decoration: none; display: block; padding: 10px; border-radius: 4px; font-weight: bold; cursor: pointer; border: none; width: 100%; }
-        .btn-comprar:hover { background: #128C7E; }
-        .btn-esgotado { background: #ccc; cursor: not-allowed; color: #666; }
-        .esgotado-tag { position: absolute; top: 10px; right: 10px; background: #ff4d4d; color: white; padding: 5px 10px; border-radius: 4px; font-weight: bold; font-size: 0.8em; z-index: 10; }
+        .secao { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
+        .topo-catalogo { display: flex; align-items: center; justify-content: space-between; margin-bottom: 40px; flex-wrap: wrap; gap: 20px;}
+        .btn-voltar { background: var(--branco); color: var(--grafite); text-decoration: none; padding: 12px 25px; border-radius: 4px; font-weight: bold; border: 1px solid var(--borda); transition: 0.3s; display: flex; align-items: center; gap: 10px; text-transform: uppercase;}
+        .btn-voltar:hover { background: var(--fundo); border-color: var(--verde-principal); color: var(--verde-principal);}
+        .titulo-secao { font-size: 2.2em; color: var(--verde-principal); text-transform: uppercase; font-weight: 900; margin: 0 auto;}
 
-        .btn-zap-flutuante { position: fixed; bottom: 30px; right: 30px; background: #25D366; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 999; }
-        .btn-zap-flutuante img { width: 30px; filter: invert(1); }
+        .grid-produtos { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; }
+        .cartao-produto { background: white; border: 1px solid var(--borda); padding: 25px; border-radius: 8px; text-align: center; transition: 0.3s; position: relative; display: flex; flex-direction: column; height: 100%;}
+        .cartao-produto:hover { box-shadow: 0 10px 20px rgba(0,0,0,0.1); border-color: var(--verde-principal); transform: translateY(-5px);}
+        .selo-desconto { position: absolute; top: 10px; right: 10px; background: #e74c3c; color: white; padding: 6px 12px; font-size: 0.85em; font-weight: 900; border-radius: 3px; letter-spacing: 1px;}
+        .cartao-produto img { width: 100%; height: 200px; object-fit: contain; margin-bottom: 15px; }
+        .cartao-produto h3 { font-size: 1.1em; margin-bottom: 10px; color: var(--grafite); line-height: 1.4; font-weight: bold;}
+        .preco-antigo { text-decoration: line-through; color: #999; font-size: 0.9em; min-height: 1.2em;}
+        .preco-atual { color: var(--verde-principal); font-size: 2em; font-weight: 900; margin-bottom: 15px; margin-top: auto;}
+        .btn-comprar { margin-top: auto; background: var(--verde-principal); color: white; text-decoration: none; padding: 15px; font-weight: bold; text-transform: uppercase; border-radius: 4px; display: block; width: 100%; border: none; cursor: pointer; transition: 0.3s;}
+        .btn-comprar:hover { background: var(--verde-destaque); }
     </style>
 </head>
 <body>
 
     <header>
-        <a href="index.html" class="btn-header">← Voltar</a>
-        <img src="images.jfif" alt="Logo" class="logo-pequena">
-        <span style="font-weight: bold; color: var(--verde);">Catálogo</span>
+        <a href="index.html" class="logo-container">
+            <img src="images.jfif" alt="Giacomini" class="logo-img" onerror="this.src='padrao.png'">
+            <span class="logo-texto">Giacomini</span>
+        </a>
+        <a href="carrinho.html" class="icone-carrinho-topo" title="Ir para o Carrinho">
+            <i class="fas fa-shopping-cart"></i>
+            <span id="contador-carrinho" class="badge-carrinho">0</span>
+        </a>
     </header>
 
-    <div class="busca-container">
-        <input type="text" id="inputBusca" class="search-box" placeholder="Pesquisar ferramentas, peças..." onkeyup="renderizar()">
-    </div>
+    <main class="secao">
+        <div class="topo-catalogo">
+            <a href="index.html" class="btn-voltar"><i class="fas fa-arrow-left"></i> Voltar</a>
+            <h1 class="titulo-secao" id="titulo-pagina">Catálogo Completo</h1>
+            <div style="width: 120px;"></div> 
+        </div>
 
-    <div class="grid-catalogo" id="grid-produtos">
-        <p style="text-align: center; grid-column: 1/-1; font-size: 1.2em; color: #666;">Conectando ao estoque... Aguarde.</p>
-    </div>
-
-    <a href="https://wa.me/5547989050263" class="btn-zap-flutuante" target="_blank">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp">
-    </a>
+        <div class="grid-produtos" id="grid-catalogo">
+            <p style="text-align:center; width:100%; font-size:1.2em;">Carregando produtos...</p>
+        </div>
+    </main>
 
     <script>
-        // ===> COLOQUE O SEU LINK DA PLANILHA AQUI <===
         const URL_PLANILHA = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSjwdcNetNoRZzXi20wyCVlMwhQf86ckoI8ZcIDui7wnvQpxUg7NIAio6HEu_CMHqyG1yT4Rcee_q6H/pub?output=csv';
 
-        let produtosAtuais = [];
+        function atualizarContador() {
+            let carrinho = JSON.parse(localStorage.getItem('carrinho')) || [];
+            document.getElementById('contador-carrinho').innerText = carrinho.length;
+        }
 
-        async function carregarDados() {
+        async function carregarCatalogo() {
+            const parametros = new URLSearchParams(window.location.search);
+            const termoBusca = parametros.get('busca') ? parametros.get('busca').toLowerCase() : '';
+            
+            if(termoBusca) {
+                document.getElementById('titulo-pagina').innerText = 'Resultados para: "' + parametros.get('busca') + '"';
+            }
+
             try {
                 const resposta = await fetch(URL_PLANILHA);
                 const dadosTexto = await resposta.text();
-                
-                // Remove linhas completamente vazias
-                const linhas = dadosTexto.split(/\r?\n/).filter(linha => linha.trim() !== "");
-                const dadosSemCabecalho = linhas.slice(1); 
+                const linhas = dadosTexto.split(/\r?\n/).slice(1).filter(l => l.trim() !== "");
 
-                produtosAtuais = dadosSemCabecalho.map(linha => {
-                    const colunas = linha.split(',');
-                    if(!colunas[0] || !colunas[1]) return null;
+                let html = '';
 
-                    return {
-                        nome: colunas[0].trim(),
-                        preco: parseFloat(colunas[1]) || 0,
-                        cat: (colunas[2] || "").trim(),
-                        img: (colunas[3] || "").trim(),
-                        estoque: parseInt(colunas[4]) || 0
-                    };
-                }).filter(p => p !== null && p.nome !== ""); 
-
-                renderizar();
-            } catch (erro) {
-                document.getElementById('grid-produtos').innerHTML = "<p style='text-align:center; grid-column:1/-1; color:red;'>Erro ao carregar os produtos da planilha.</p>";
-            }
-        }
-
-        function renderizar() {
-            const grid = document.getElementById('grid-produtos');
-            const busca = document.getElementById('inputBusca').value.toLowerCase();
-            grid.innerHTML = '';
-
-            if (produtosAtuais.length === 0) {
-                grid.innerHTML = "<p style='text-align:center; grid-column:1/-1;'>Nenhum produto cadastrado na planilha.</p>";
-                return;
-            }
-
-            produtosAtuais.forEach(p => {
-                if (p.nome.toLowerCase().includes(busca)) {
-                    const estaEsgotado = p.estoque <= 0;
+                linhas.forEach(linha => {
+                    const colunas = linha.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/(^"|"$)/g, '').trim());
+                    if(!colunas[0] || !colunas[1]) return;
                     
-                    // Inteligência da Imagem
-                    let caminhoImg = p.img || 'images.jfif';
-                    if (caminhoImg !== 'images.jfif' && !caminhoImg.startsWith('img/') && !caminhoImg.startsWith('http')) {
-                        caminhoImg = 'img/' + caminhoImg;
-                    }
-                    
-                    grid.innerHTML += `
-                        <div class="cartao-mini">
-                            ${estaEsgotado ? '<div class="esgotado-tag">ESGOTADO</div>' : ''}
-                            <img src="${caminhoImg}" alt="${p.nome}" onerror="this.src='images.jfif'">
-                            <h4>${p.nome}</h4>
-                            <div class="preco">R$ ${p.preco.toFixed(2).replace('.', ',')}</div>
-                            <div class="estoque-info">${estaEsgotado ? 'Sem estoque' : 'Estoque: ' + p.estoque + ' un'}</div>
-                            
-                            ${estaEsgotado 
-                                ? '<button class="btn-comprar btn-esgotado" disabled>Indisponível</button>' 
-                                : `<a href="produto.html?nome=${encodeURIComponent(p.nome)}&preco=${p.preco}&img=${encodeURIComponent(caminhoImg)}" class="btn-comprar" style="background: var(--verde);">Ver Detalhes</a>`
-                            }
-                        </div>
+                    let nome = colunas[0];
+                    let preco = parseFloat(colunas[1]) || 0;
+                    let precoAntigo = parseFloat(colunas[2]) || 0;
+                    let img = colunas[3] || 'padrao.png';
+                    let estoque = parseInt(colunas[4]) || 0;
+
+                    if (estoque <= 0) return; 
+                    if (termoBusca && !nome.toLowerCase().includes(termoBusca)) return;
+
+                    if (img !== 'padrao.png' && !img.startsWith('http') && !img.startsWith('img/')) img = 'img/' + img;
+
+                    let temDesconto = precoAntigo > preco;
+                    let htmlPrecoAntigo = temDesconto ? `<div class="preco-antigo">De: R$ ${precoAntigo.toFixed(2).replace('.',',')}</div>` : `<div class="preco-antigo"></div>`;
+                    let seloHTML = temDesconto ? `<div class="selo-desconto">${Math.round(((precoAntigo - preco) / precoAntigo) * 100)}% OFF</div>` : '';
+
+                    html += `
+                        <a href="produto.html?nome=${encodeURIComponent(nome)}" style="text-decoration:none; color:inherit;">
+                            <div class="cartao-produto">
+                                ${seloHTML}
+                                <img src="${img}" alt="${nome}" onerror="this.src='padrao.png'">
+                                <h3>${nome}</h3>
+                                ${htmlPrecoAntigo}
+                                <div class="preco-atual">R$ ${preco.toFixed(2).replace('.', ',')}</div>
+                                <button class="btn-comprar">Ver Detalhes</button>
+                            </div>
+                        </a>
                     `;
-                }
-            });
-        }
+                });
 
-        window.onload = carregarDados;
+                document.getElementById('grid-catalogo').innerHTML = html || "<p style='width:100%; text-align:center; font-size:1.2em; padding: 40px;'>Nenhum produto encontrado.</p>";
+
+            } catch (erro) {
+                console.error(erro);
+            }
+        }
+        window.onload = () => { carregarCatalogo(); atualizarContador(); };
     </script>
 </body>
 </html>
