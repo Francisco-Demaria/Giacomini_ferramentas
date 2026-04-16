@@ -214,7 +214,8 @@
         // Atualizar Número do Carrinho
         function atualizarContador() {
             let carrinho = JSON.parse(localStorage.getItem('carrinho')) || [];
-            document.getElementById('contador-carrinho').innerText = carrinho.length;
+            let contador = document.getElementById('contador-carrinho');
+            if(contador) contador.innerText = carrinho.length;
         }
 
         // Busca
@@ -232,6 +233,7 @@
         let timer;
         function mudarSlide(n) {
             let slides = document.querySelectorAll('.slide');
+            if(slides.length === 0) return; // Segurança caso não tenha slider
             slideIndex += n;
             if (slideIndex >= slides.length) slideIndex = 0;
             if (slideIndex < 0) slideIndex = slides.length - 1;
@@ -249,12 +251,16 @@
             if (img === '') img = 'padrao.png';
 
             let temDesconto = p.precoAntigo > p.preco;
-            let htmlPrecoAntigo = temDesconto ? `<div class="preco-antigo">De: R$ ${p.precoAntigo.toFixed(2).replace('.',',')}</div>` : `<div class="preco-antigo"></div>`;
+            let htmlPrecoAntigo = temDesconto ? `<div class="preco-antigo">De: R$ ${p.precoAntigo.toFixed(2).replace('.',',')}</div>` : `<div class="preco-antigo" style="height:20px;"></div>`;
             let seloHTML = temDesconto ? `<div class="selo-desconto">${Math.round(((p.precoAntigo - p.preco) / p.precoAntigo) * 100)}% OFF</div>` : '';
             
+            // Adiciona a etiqueta de Categoria (Máquina/Peça)
+            let badgeCategoria = p.categoria ? `<span class="badge-categoria" style="position:absolute; top:10px; left:10px; background:var(--verde-escuro); color:white; padding:5px 10px; border-radius:10px; font-size:0.8em; z-index:2;">${p.categoria}</span>` : '';
+
             return `
-                <a href="produto.html?nome=${encodeURIComponent(p.nome)}" style="text-decoration:none; color:inherit;">
+                <a href="produto.html?nome=${encodeURIComponent(p.nome)}" style="text-decoration:none; color:inherit; position:relative; display:block;">
                     <div class="cartao-produto">
+                        ${badgeCategoria}
                         ${seloHTML}
                         <img src="${img}" onerror="this.src='padrao.png'" alt="${p.nome}">
                         <h3>${p.nome}</h3>
@@ -266,7 +272,6 @@
         }
 
         // Carregar do CSV Real
-// Carregar do CSV Real
         async function carregarDados() {
             try {
                 const resposta = await fetch(URL_PLANILHA);
@@ -275,43 +280,44 @@
 
                 let produtos = linhas.map(linha => {
                     const col = linha.split(','); // Divide a linha pelas vírgulas
-                    
-                    // Se a linha não tiver dados suficientes, ignora
-                    if (col.length < 7) return null;
+                    if (col.length < 7) return null; // Segurança contra linhas vazias
 
                     return {
                         nome: col[0].trim(),
-                        categoria: col[1].trim(),     // NOVA COLUNA B: Máquina ou Peça
-                        preco: parseFloat(col[2]),    // Coluna C (Preço Atual)
+                        categoria: col[1].trim(),     // NOVA COLUNA B
+                        preco: parseFloat(col[2]),    // Coluna C
                         precoAntigo: parseFloat(col[3]) || 0, // Coluna D
-                        img: col[4].trim(),           // Coluna E (Imagem)
+                        img: col[4].trim(),           // Coluna E
                         estoque: parseInt(col[5]),    // Coluna F
                         descricao: col[6].trim()      // Coluna G
                     };
                 }).filter(p => p !== null && p.estoque > 0);
 
-                // --- CONTINUAÇÃO ORIGINAL DO SEU CÓDIGO ---
-                
                 // 1. Destaques (4 primeiros)
                 let destaques = produtos.slice(0, 4);
-                document.getElementById('grid-destaques').innerHTML = destaques.map(p => criarCartao(p)).join('');
+                let gridDest = document.getElementById('grid-destaques');
+                if(gridDest) gridDest.innerHTML = destaques.map(p => criarCartao(p)).join('');
 
                 // 2. Lançamentos (Últimos 4 adicionados na planilha)
                 let lancamentos = produtos.slice(-4).reverse();
-                document.getElementById('grid-lancamentos').innerHTML = lancamentos.map(p => criarCartao(p)).join('');
+                let gridLanc = document.getElementById('grid-lancamentos');
+                if(gridLanc) gridLanc.innerHTML = lancamentos.map(p => criarCartao(p)).join('');
 
                 // 3. Promoções (Qualquer um que tenha precoAntigo maior que o preço atual)
                 let promocoes = produtos.filter(p => p.precoAntigo > p.preco).slice(0, 4);
-                document.getElementById('grid-promocoes').innerHTML = promocoes.map(p => criarCartao(p)).join('');
+                let gridProm = document.getElementById('grid-promocoes');
+                if(gridProm) gridProm.innerHTML = promocoes.map(p => criarCartao(p)).join('');
 
             } catch (error) {
                 console.error("Erro ao carregar a planilha:", error);
+                document.getElementById('grid-destaques').innerHTML = "<p>Erro ao carregar produtos. Tente novamente.</p>";
             }
         }
 
-        // Iniciar o carregamento
+        // Iniciar tudo ao abrir a página
         carregarDados();
-
+        atualizarContador();
+        
                 // Destaques (1 a 4)
                 document.getElementById('grid-destaques').innerHTML = produtos.slice(0, 4).map(criarCartao).join('');
                 
