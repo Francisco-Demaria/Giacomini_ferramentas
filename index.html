@@ -208,7 +208,7 @@
         <p style="opacity: 0.6; font-size: 0.85em; text-transform: uppercase; letter-spacing: 1px;">© 2026 Giacomini. Todos os direitos reservados.</p>
     </footer>
 
-    <script>
+<script>
         const URL_PLANILHA = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSjwdcNetNoRZzXi20wyCVlMwhQf86ckoI8ZcIDui7wnvQpxUg7NIAio6HEu_CMHqyG1yT4Rcee_q6H/pub?output=csv';
 
         // Atualizar Número do Carrinho
@@ -233,7 +233,7 @@
         let timer;
         function mudarSlide(n) {
             let slides = document.querySelectorAll('.slide');
-            if(slides.length === 0) return; // Segurança caso não tenha slider
+            if(slides.length === 0) return;
             slideIndex += n;
             if (slideIndex >= slides.length) slideIndex = 0;
             if (slideIndex < 0) slideIndex = slides.length - 1;
@@ -254,7 +254,7 @@
             let htmlPrecoAntigo = temDesconto ? `<div class="preco-antigo">De: R$ ${p.precoAntigo.toFixed(2).replace('.',',')}</div>` : `<div class="preco-antigo" style="height:20px;"></div>`;
             let seloHTML = temDesconto ? `<div class="selo-desconto">${Math.round(((p.precoAntigo - p.preco) / p.precoAntigo) * 100)}% OFF</div>` : '';
             
-            // Adiciona a etiqueta de Categoria (Máquina/Peça)
+            // Etiqueta Máquina/Peça
             let badgeCategoria = p.categoria ? `<span class="badge-categoria" style="position:absolute; top:10px; left:10px; background:var(--verde-escuro); color:white; padding:5px 10px; border-radius:10px; font-size:0.8em; z-index:2;">${p.categoria}</span>` : '';
 
             return `
@@ -279,55 +279,33 @@
                 const linhas = dadosTexto.split(/\r?\n/).slice(1).filter(l => l.trim() !== "");
 
                 let produtos = linhas.map(linha => {
-                    const col = linha.split(','); // Divide a linha pelas vírgulas
-                    if (col.length < 7) return null; // Segurança contra linhas vazias
+                    const col = linha.split(',');
+                    if (col.length < 7) return null;
 
                     return {
                         nome: col[0].trim(),
-                        categoria: col[1].trim(),     // NOVA COLUNA B
-                        preco: parseFloat(col[2]),    // Coluna C
-                        precoAntigo: parseFloat(col[3]) || 0, // Coluna D
-                        img: col[4].trim(),           // Coluna E
-                        estoque: parseInt(col[5]),    // Coluna F
-                        descricao: col[6].trim()      // Coluna G
+                        categoria: col[1].trim(),     // MÁQUINA ou PEÇA
+                        preco: parseFloat(col[2]),
+                        precoAntigo: parseFloat(col[3]) || 0,
+                        img: col[4].trim(),
+                        estoque: parseInt(col[5]),
+                        descricao: col[6].trim()
                     };
                 }).filter(p => p !== null && p.estoque > 0);
 
-                // 1. Destaques (4 primeiros)
-                let destaques = produtos.slice(0, 4);
+                // Destaques (1 a 4)
                 let gridDest = document.getElementById('grid-destaques');
-                if(gridDest) gridDest.innerHTML = destaques.map(p => criarCartao(p)).join('');
-
-                // 2. Lançamentos (Últimos 4 adicionados na planilha)
+                if(gridDest) gridDest.innerHTML = produtos.slice(0, 4).map(p => criarCartao(p)).join('');
+                
+                // Lançamentos (Últimos 4 adicionados na planilha)
                 let lancamentos = produtos.slice(-4).reverse();
                 let gridLanc = document.getElementById('grid-lancamentos');
-                if(gridLanc) gridLanc.innerHTML = lancamentos.map(p => criarCartao(p)).join('');
-
-                // 3. Promoções (Qualquer um que tenha precoAntigo maior que o preço atual)
-                let promocoes = produtos.filter(p => p.precoAntigo > p.preco).slice(0, 4);
-                let gridProm = document.getElementById('grid-promocoes');
-                if(gridProm) gridProm.innerHTML = promocoes.map(p => criarCartao(p)).join('');
-
-            } catch (error) {
-                console.error("Erro ao carregar a planilha:", error);
-                document.getElementById('grid-destaques').innerHTML = "<p>Erro ao carregar produtos. Tente novamente.</p>";
-            }
-        }
-
-        // Iniciar tudo ao abrir a página
-        carregarDados();
-        atualizarContador();
-        
-                // Destaques (1 a 4)
-                document.getElementById('grid-destaques').innerHTML = produtos.slice(0, 4).map(criarCartao).join('');
+                if(gridLanc) gridLanc.innerHTML = lancamentos.length > 0 ? lancamentos.map(p => criarCartao(p)).join('') : "<p style='width:100%; text-align:center;'>Nenhum lançamento recente.</p>";
                 
-                // Lançamentos (5 a 8)
-                let lancamentos = produtos.slice(-4).reverse();
-                document.getElementById('grid-lancamentos').innerHTML = lancamentos.length > 0 ? lancamentos.map(criarCartao).join('') : "<p style='width:100%; text-align:center;'>Nenhum lançamento recente.</p>";
-                
-                // Promoções (Filtra quem tem preço antigo maior que atual)
+                // Promoções (Quem tem preço antigo maior que atual)
                 let promocoes = produtos.filter(p => p.precoAntigo > p.preco);
-                document.getElementById('grid-promocoes').innerHTML = promocoes.length > 0 ? promocoes.slice(0, 4).map(criarCartao).join('') : "<p style='width:100%; text-align:center;'>Nenhuma oferta ativa no momento.</p>";
+                let gridProm = document.getElementById('grid-promocoes');
+                if(gridProm) gridProm.innerHTML = promocoes.length > 0 ? promocoes.slice(0, 4).map(p => criarCartao(p)).join('') : "<p style='width:100%; text-align:center;'>Nenhuma oferta ativa no momento.</p>";
 
             } catch (erro) {
                 console.error("Erro na planilha", erro);
