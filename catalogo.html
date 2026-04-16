@@ -84,7 +84,7 @@
         <div id="lista-pecas" class="lista-pecas"></div>
     </main>
 
-   <script>
+    <script>
         const URL_PLANILHA = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSjwdcNetNoRZzXi20wyCVlMwhQf86ckoI8ZcIDui7wnvQpxUg7NIAio6HEu_CMHqyG1yT4Rcee_q6H/pub?output=csv';
 
         function atualizarContador() {
@@ -129,14 +129,15 @@
                 let produtos = linhas.map(linha => {
                     const col = linha.split(',');
                     if (col.length < 7) return null;
+                    
                     return {
-                        nome: col[0].trim(),
-                        categoria: col[1].trim(),
-                        preco: parseFloat(col[2]),
+                        nome: col[0] ? col[0].trim() : '',
+                        categoria: col[1] ? col[1].trim() : '',
+                        preco: parseFloat(col[2]) || 0,
                         precoAntigo: parseFloat(col[3]) || 0,
-                        img: col[4].trim(),
-                        estoque: parseInt(col[5]),
-                        descricao: col[6].trim()
+                        img: col[4] ? col[4].trim() : '',
+                        estoque: parseInt(col[5]) || 0,
+                        descricao: col[6] ? col[6].trim() : ''
                     };
                 }).filter(p => p !== null && p.estoque > 0);
 
@@ -148,38 +149,43 @@
                 const containerPecas = document.getElementById('lista-pecas');
 
                 // Renderiza Máquinas (em cartões)
-                if(maquinas.length > 0) {
-                    containerMaquinas.innerHTML = maquinas.map(p => criarCartao(p)).join('');
-                } else {
-                    containerMaquinas.innerHTML = '<p>Nenhuma máquina encontrada.</p>';
+                if (containerMaquinas) {
+                    if (maquinas.length > 0) {
+                        containerMaquinas.innerHTML = maquinas.map(p => criarCartao(p)).join('');
+                    } else {
+                        containerMaquinas.innerHTML = '<p style="text-align:center; width:100%;">Nenhuma máquina encontrada.</p>';
+                    }
                 }
 
                 // Renderiza Peças (em Sanfona)
-                if(pecas.length > 0) {
-                    containerPecas.innerHTML = pecas.map((p, index) => `
-                        <div class="peca-item">
-                            <div class="peca-cabecalho" onclick="abrirPeca(${index})" id="cabecalho-${index}">
-                                <span>${p.nome}</span>
-                                <span><strong style="color:var(--verde-destaque); margin-right:15px;">R$ ${p.preco.toFixed(2).replace('.', ',')}</strong> <span class="seta">▼</span></span>
-                            </div>
-                            <div class="peca-conteudo" id="conteudo-${index}">
-                                <div class="peca-info">
-                                    <div>
-                                        <p><strong>Estoque:</strong> ${p.estoque} unidades</p>
-                                        <p><strong>Detalhes:</strong> ${p.descricao}</p>
+                if (containerPecas) {
+                    if (pecas.length > 0) {
+                        containerPecas.innerHTML = pecas.map((p, index) => `
+                            <div class="peca-item">
+                                <div class="peca-cabecalho" onclick="abrirPeca(${index})" id="cabecalho-${index}">
+                                    <span>${p.nome}</span>
+                                    <span><strong style="color:var(--verde-destaque); margin-right:15px;">R$ ${p.preco.toFixed(2).replace('.', ',')}</strong> <span class="seta">▼</span></span>
+                                </div>
+                                <div class="peca-conteudo" id="conteudo-${index}">
+                                    <div class="peca-info">
+                                        <div>
+                                            <p><strong>Estoque:</strong> ${p.estoque} unidades</p>
+                                            <p><strong>Detalhes:</strong> ${p.descricao}</p>
+                                        </div>
+                                        <a href="produto.html?nome=${encodeURIComponent(p.nome)}" class="btn-comprar" style="text-decoration:none; display:inline-block; margin-top:10px;">Ver Peça</a>
                                     </div>
-                                    <a href="produto.html?nome=${encodeURIComponent(p.nome)}" class="btn-comprar" style="text-decoration:none; display:inline-block; margin-top:10px;">Ver Peça</a>
                                 </div>
                             </div>
-                        </div>
-                    `).join('');
-                } else {
-                    containerPecas.innerHTML = '<p style="text-align:center;">Nenhuma peça encontrada.</p>';
+                        `).join('');
+                    } else {
+                        containerPecas.innerHTML = '<p style="text-align:center; width:100%;">Nenhuma peça encontrada.</p>';
+                    }
                 }
 
             } catch (erro) {
                 console.error("Erro na planilha", erro);
-                document.getElementById('lista-maquinas').innerHTML = "<p>Erro ao carregar o catálogo.</p>";
+                const containerMaquinas = document.getElementById('lista-maquinas');
+                if (containerMaquinas) containerMaquinas.innerHTML = "<p style='text-align:center; width:100%;'>Erro ao carregar o catálogo.</p>";
             }
         }
 
@@ -188,12 +194,14 @@
             const conteudo = document.getElementById(`conteudo-${index}`);
             const cabecalho = document.getElementById(`cabecalho-${index}`);
             
-            if (conteudo.classList.contains('ativo')) {
-                conteudo.classList.remove('ativo');
-                cabecalho.classList.remove('aberto');
-            } else {
-                conteudo.classList.add('ativo');
-                cabecalho.classList.add('aberto');
+            if (conteudo && cabecalho) {
+                if (conteudo.classList.contains('ativo')) {
+                    conteudo.classList.remove('ativo');
+                    cabecalho.classList.remove('aberto');
+                } else {
+                    conteudo.classList.add('ativo');
+                    cabecalho.classList.add('aberto');
+                }
             }
         }
 
