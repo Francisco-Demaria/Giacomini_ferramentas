@@ -273,15 +273,18 @@
                 const linhas = dadosTexto.split(/\r?\n/).slice(1).filter(l => l.trim() !== "");
 
                 let produtos = linhas.map(linha => {
-                    const col = linha.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/(^"|"$)/g, '').trim());
-                    if(!col[0] || !col[1]) return null;
-                    return { 
-                        nome: col[0], 
-                        preco: parseFloat(col[1]) || 0, 
-                        precoAntigo: parseFloat(col[2]) || 0, 
-                        img: col[3] || '', 
-                        estoque: parseInt(col[4]) || 0 
-                    };
+                    const produtos = linhas.map(linha => {
+                        const col = linha.split(','); // Divide a linha pelas vírgulas
+                        return {
+                            nome: col[0],
+                            categoria: col[1],    // NOVA COLUNA B: Máquina ou Peça
+                            precoAtual: col[2],   // Coluna C
+                            precoAntigo: col[3],  // Coluna D
+                            imagem: col[4],       // Coluna E
+                            estoque: col[5],      // Coluna F
+                            descricao: col[6]     // Coluna G
+                            };
+                    });
                 }).filter(p => p !== null && p.estoque > 0);
 
                 // Destaques (1 a 4)
