@@ -105,14 +105,19 @@
                 let html = '';
 
                 linhas.forEach(linha => {
-                    const colunas = linha.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/(^"|"$)/g, '').trim());
-                    if(!colunas[0] || !colunas[1]) return;
-                    
-                    let nome = colunas[0];
-                    let preco = parseFloat(colunas[1]) || 0;
-                    let precoAntigo = parseFloat(colunas[2]) || 0;
-                    let img = colunas[3] || 'padrao.png';
-                    let estoque = parseInt(colunas[4]) || 0;
+                    // Procure a parte que faz o "map" ou cria o objeto do produto
+                    const produtos = linhas.map(linha => {
+                        const col = linha.split(','); // Divide a linha pelas vírgulas
+                        return {
+                            nome: col[0],
+                            categoria: col[1],    // NOVA COLUNA B: Máquina ou Peça
+                            precoAtual: col[2],   // Coluna C
+                            precoAntigo: col[3],  // Coluna D
+                            imagem: col[4],       // Coluna E
+                            estoque: col[5],      // Coluna F
+                            descricao: col[6]     // Coluna G
+                        };
+                    });
 
                     if (estoque <= 0) return; 
                     if (termoBusca && !nome.toLowerCase().includes(termoBusca)) return;
