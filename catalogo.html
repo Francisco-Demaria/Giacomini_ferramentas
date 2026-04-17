@@ -54,6 +54,38 @@
         .peca-info { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
         .seta { transition: transform 0.3s; }
         .peca-cabecalho.aberto .seta { transform: rotate(180deg); }
+
+        /* --- BOTÃO VOLTAR --- */
+        .btn-voltar { display: inline-block; margin: 20px; padding: 10px 20px; background: var(--verde-escuro, #333); color: white; text-decoration: none; border-radius: 5px; font-weight: bold; }
+        .btn-voltar:hover { opacity: 0.8; }
+
+        /* --- SIMETRIA DOS CARTÕES --- */
+        .grid-produtos { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; max-width: 1200px; margin: 0 auto; padding: 20px; }
+        
+        .cartao-produto { 
+            display: flex; 
+            flex-direction: column; 
+            height: 100%; 
+            justify-content: space-between; /* Empurra o botão pro fundo */
+        }
+        .cartao-produto img {
+            height: 180px; /* Trava a altura da imagem */
+            width: 100%;
+            object-fit: contain; /* Não deixa a imagem esticada nem cortada */
+            margin-bottom: 15px;
+        }
+        .cartao-produto h3 {
+            flex-grow: 1; /* Faz o título crescer e empurrar os preços pra baixo de forma alinhada */
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            min-height: 48px; /* Espaço garantido para nomes grandes */
+            margin: 0 0 10px 0;
+        }
+
+        /* --- ESTILO DOS GRUPOS DE PEÇAS --- */
+        .grupo-pecas { max-width: 800px; margin: 0 auto 30px auto; width: 100%; }
+        .titulo-grupo { color: var(--verde-escuro, #333); border-bottom: 2px solid #ddd; padding-bottom: 5px; margin-bottom: 15px; text-align: left; }
     </style>
 </head>
 <body>
@@ -77,14 +109,16 @@
     </div>
 
     <main>
-        <h2 class="secao-titulo">Máquinas e Ferramentas</h2>
-        <div id="lista-maquinas" class="grid-produtos" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 20px;"></div>
+        <a href="index.html" class="btn-voltar">← Voltar para a Loja</a>
 
-        <h2 class="secao-titulo">Catálogo de Peças</h2>
-        <div id="lista-pecas" class="lista-pecas"></div>
+        <h2 class="secao-titulo">Máquinas e Ferramentas</h2>
+        <div id="lista-maquinas" class="grid-produtos"></div>
+
+        <h2 class="secao-titulo" style="margin-top: 50px;">Catálogo de Peças</h2>
+        <div id="container-grupos-pecas" style="padding: 0 20px;"></div>
     </main>
 
-    <script>
+   <script>
         const URL_PLANILHA = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSjwdcNetNoRZzXi20wyCVlMwhQf86ckoI8ZcIDui7wnvQpxUg7NIAio6HEu_CMHqyG1yT4Rcee_q6H/pub?output=csv';
 
         function atualizarContador() {
@@ -92,9 +126,6 @@
             let contador = document.getElementById('contador-carrinho');
             if(contador) contador.innerText = carrinho.length;
         }
-
-        function abrirMenu() { document.getElementById('menu-lateral').classList.add('aberto'); document.getElementById('overlay').style.display = 'block'; }
-        function fecharMenu() { document.getElementById('menu-lateral').classList.remove('aberto'); document.getElementById('overlay').style.display = 'none'; }
 
         function criarCartao(p) {
             let img = p.img;
@@ -104,18 +135,18 @@
             let temDesconto = p.precoAntigo > p.preco;
             let htmlPrecoAntigo = temDesconto ? `<div class="preco-antigo">De: R$ ${p.precoAntigo.toFixed(2).replace('.',',')}</div>` : `<div class="preco-antigo" style="height:20px;"></div>`;
             let seloHTML = temDesconto ? `<div class="selo-desconto">${Math.round(((p.precoAntigo - p.preco) / p.precoAntigo) * 100)}% OFF</div>` : '';
-            let badgeCategoria = p.categoria ? `<span class="badge-categoria" style="position:absolute; top:10px; left:10px; background:var(--verde-escuro); color:white; padding:5px 10px; border-radius:10px; font-size:0.8em; z-index:2;">${p.categoria}</span>` : '';
-
+            
             return `
-                <a href="produto.html?nome=${encodeURIComponent(p.nome)}" style="text-decoration:none; color:inherit; position:relative; display:block;">
+                <a href="produto.html?nome=${encodeURIComponent(p.nome)}" style="text-decoration:none; color:inherit; display:block; height:100%;">
                     <div class="cartao-produto">
-                        ${badgeCategoria}
                         ${seloHTML}
                         <img src="${img}" onerror="this.src='padrao.png'" alt="${p.nome}">
                         <h3>${p.nome}</h3>
-                        ${htmlPrecoAntigo}
-                        <div class="preco-atual">R$ ${p.preco.toFixed(2).replace('.', ',')}</div>
-                        <button class="btn-comprar">Ver Detalhes</button>
+                        <div style="width:100%;">
+                            ${htmlPrecoAntigo}
+                            <div class="preco-atual">R$ ${p.preco.toFixed(2).replace('.', ',')}</div>
+                            <button class="btn-comprar" style="width:100%; margin-top:10px;">Ver Detalhes</button>
+                        </div>
                     </div>
                 </a>`;
         }
@@ -128,80 +159,87 @@
 
                 let produtos = linhas.map(linha => {
                     const col = linha.split(',');
-                    if (col.length < 7) return null;
+                    if (col.length < 8) return null; // Agora exigimos 8 colunas (A até H)
                     
                     return {
                         nome: col[0] ? col[0].trim() : '',
                         categoria: col[1] ? col[1].trim() : '',
-                        preco: parseFloat(col[2]) || 0,
-                        precoAntigo: parseFloat(col[3]) || 0,
-                        img: col[4] ? col[4].trim() : '',
-                        estoque: parseInt(col[5]) || 0,
-                        descricao: col[6] ? col[6].trim() : ''
+                        subcategoria: col[2] ? col[2].trim() : 'Outros', // COLUNA C: TIPO DE PEÇA
+                        preco: parseFloat(col[3]) || 0,                  // COLUNA D: PREÇO
+                        precoAntigo: parseFloat(col[4]) || 0,            // COLUNA E: PREÇO ANTIGO
+                        img: col[5] ? col[5].trim() : '',                // COLUNA F: IMAGEM
+                        estoque: parseInt(col[6]) || 0,                  // COLUNA G: ESTOQUE
+                        descricao: col[7] ? col[7].trim() : ''           // COLUNA H: DESCRIÇÃO
                     };
                 }).filter(p => p !== null && p.estoque > 0);
 
-                // Separa as máquinas das peças (identifica pela palavra "peça" ou "peca")
                 const maquinas = produtos.filter(p => !p.categoria.toLowerCase().includes('peça') && !p.categoria.toLowerCase().includes('peca'));
                 const pecas = produtos.filter(p => p.categoria.toLowerCase().includes('peça') || p.categoria.toLowerCase().includes('peca'));
 
                 const containerMaquinas = document.getElementById('lista-maquinas');
-                const containerPecas = document.getElementById('lista-pecas');
+                const containerPecas = document.getElementById('container-grupos-pecas');
 
-                // Renderiza Máquinas (em cartões)
+                // 1. Renderiza as Máquinas
                 if (containerMaquinas) {
-                    if (maquinas.length > 0) {
-                        containerMaquinas.innerHTML = maquinas.map(p => criarCartao(p)).join('');
-                    } else {
-                        containerMaquinas.innerHTML = '<p style="text-align:center; width:100%;">Nenhuma máquina encontrada.</p>';
-                    }
+                    containerMaquinas.innerHTML = maquinas.length > 0 ? maquinas.map(p => criarCartao(p)).join('') : '<p style="width:100%; text-align:center;">Nenhuma máquina encontrada.</p>';
                 }
 
-                // Renderiza Peças (em Sanfona)
+                // 2. Agrupa e Renderiza as Peças
                 if (containerPecas) {
                     if (pecas.length > 0) {
-                        containerPecas.innerHTML = pecas.map((p, index) => `
-                            <div class="peca-item">
-                                <div class="peca-cabecalho" onclick="abrirPeca(${index})" id="cabecalho-${index}">
-                                    <span>${p.nome}</span>
-                                    <span><strong style="color:var(--verde-destaque); margin-right:15px;">R$ ${p.preco.toFixed(2).replace('.', ',')}</strong> <span class="seta">▼</span></span>
+                        // Agrupa as peças pela coluna Subcategoria (Anel, Rolamento, etc)
+                        let grupos = {};
+                        pecas.forEach(p => {
+                            if (!grupos[p.subcategoria]) grupos[p.subcategoria] = [];
+                            grupos[p.subcategoria].push(p);
+                        });
+
+                        let htmlGrupos = '';
+                        // Cria a sanfona separada por grupos
+                        for (let subcat in grupos) {
+                            htmlGrupos += `
+                            <div class="grupo-pecas">
+                                <h3 class="titulo-grupo">${subcat}</h3>
+                                <div class="lista-pecas">
+                                    ${grupos[subcat].map((p, index) => {
+                                        let idUnico = subcat.replace(/\s+/g, '') + index;
+                                        return `
+                                        <div class="peca-item">
+                                            <div class="peca-cabecalho" onclick="abrirPeca('${idUnico}')" id="cabecalho-${idUnico}">
+                                                <span>${p.nome}</span>
+                                                <span><strong style="color:var(--verde-destaque); margin-right:15px;">R$ ${p.preco.toFixed(2).replace('.', ',')}</strong> <span class="seta">▼</span></span>
+                                            </div>
+                                            <div class="peca-conteudo" id="conteudo-${idUnico}">
+                                                <div class="peca-info">
+                                                    <div>
+                                                        <p><strong>Estoque:</strong> ${p.estoque} unidades</p>
+                                                        <p><strong>Detalhes:</strong> ${p.descricao}</p>
+                                                    </div>
+                                                    <a href="produto.html?nome=${encodeURIComponent(p.nome)}" class="btn-comprar" style="text-decoration:none; display:inline-block; margin-top:10px;">Ver Peça</a>
+                                                </div>
+                                            </div>
+                                        </div>`
+                                    }).join('')}
                                 </div>
-                                <div class="peca-conteudo" id="conteudo-${index}">
-                                    <div class="peca-info">
-                                        <div>
-                                            <p><strong>Estoque:</strong> ${p.estoque} unidades</p>
-                                            <p><strong>Detalhes:</strong> ${p.descricao}</p>
-                                        </div>
-                                        <a href="produto.html?nome=${encodeURIComponent(p.nome)}" class="btn-comprar" style="text-decoration:none; display:inline-block; margin-top:10px;">Ver Peça</a>
-                                    </div>
-                                </div>
-                            </div>
-                        `).join('');
+                            </div>`;
+                        }
+                        containerPecas.innerHTML = htmlGrupos;
                     } else {
-                        containerPecas.innerHTML = '<p style="text-align:center; width:100%;">Nenhuma peça encontrada.</p>';
+                        containerPecas.innerHTML = '<p style="text-align:center;">Nenhuma peça encontrada.</p>';
                     }
                 }
 
             } catch (erro) {
                 console.error("Erro na planilha", erro);
-                const containerMaquinas = document.getElementById('lista-maquinas');
-                if (containerMaquinas) containerMaquinas.innerHTML = "<p style='text-align:center; width:100%;'>Erro ao carregar o catálogo.</p>";
             }
         }
 
-        // Função que faz a sanfona abrir e fechar
-        function abrirPeca(index) {
-            const conteudo = document.getElementById(`conteudo-${index}`);
-            const cabecalho = document.getElementById(`cabecalho-${index}`);
-            
+        function abrirPeca(id) {
+            const conteudo = document.getElementById(`conteudo-${id}`);
+            const cabecalho = document.getElementById(`cabecalho-${id}`);
             if (conteudo && cabecalho) {
-                if (conteudo.classList.contains('ativo')) {
-                    conteudo.classList.remove('ativo');
-                    cabecalho.classList.remove('aberto');
-                } else {
-                    conteudo.classList.add('ativo');
-                    cabecalho.classList.add('aberto');
-                }
+                conteudo.classList.toggle('ativo');
+                cabecalho.classList.toggle('aberto');
             }
         }
 
