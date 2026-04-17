@@ -72,89 +72,92 @@
     </div>
 
     <script>
-        const URL_PLANILHA = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSjwdcNetNoRZzXi20wyCVlMwhQf86ckoI8ZcIDui7wnvQpxUg7NIAio6HEu_CMHqyG1yT4Rcee_q6H/pub?output=csv'; 
-        const parametros = new URLSearchParams(window.location.search);
-        const nomeUrl = parametros.get('nome');
+        const URL_PLANILHA = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSjwdcNetNoRZzXi20wyCVlMwhQf86ckoI8ZcIDui7wnvQpxUg7NIAio6HEu_CMHqyG1yT4Rcee_q6H/pub?output=csv';
 
         function atualizarContador() {
             let carrinho = JSON.parse(localStorage.getItem('carrinho')) || [];
-            document.getElementById('contador-carrinho').innerText = carrinho.length;
+            let contador = document.getElementById('contador-carrinho');
+            if(contador) contador.innerText = carrinho.length;
         }
 
-        function adicionarAoCarrinho(nome, preco, imagem) {
-            let carrinho = JSON.parse(localStorage.getItem('carrinho')) || [];
-            carrinho.push({nome: nome, preco: preco, img: imagem});
-            localStorage.setItem('carrinho', JSON.stringify(carrinho));
-            window.location.href = "carrinho.html"; 
-        }
+        async function carregarProduto() {
+            const parametros = new URLSearchParams(window.location.search);
+            const nomeProduto = parametros.get('nome');
 
-        async function carregar() {
+            if (!nomeProduto) {
+                document.getElementById('detalhes-produto').innerHTML = '<p>Produto não encontrado.</p>';
+                return;
+            }
+
             try {
                 const resposta = await fetch(URL_PLANILHA);
                 const dadosTexto = await resposta.text();
                 const linhas = dadosTexto.split(/\r?\n/).slice(1).filter(l => l.trim() !== "");
-                
+
                 let produtos = linhas.map(linha => {
-                    const colunas = linha.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/(^"|"$)/g, '').trim());
-                    let caminhoImg = colunas[3] || 'padrao.png';
-                    if (caminhoImg !== 'padrao.png' && !caminhoImg.startsWith('http') && !caminhoImg.startsWith('img/')) caminhoImg = 'img/' + caminhoImg;
-                    return { 
+                    const col = linha.split(',');
+                    if (col.length < 8) return null; // Puxando as 8 colunas corretamente
+                    
+                    return {
                         nome: col[0] ? col[0].trim() : '',
                         categoria: col[1] ? col[1].trim() : '',
-                        subcategoria: col[2] ? col[2].trim() : '', 
+                        subcategoria: col[2] ? col[2].trim() : '',
                         preco: parseFloat(col[3]) || 0,
                         precoAntigo: parseFloat(col[4]) || 0,
                         img: col[5] ? col[5].trim() : '',
                         estoque: parseInt(col[6]) || 0,
                         descricao: col[7] ? col[7].trim() : ''
                     };
-                }).filter(p => p.nome && p.estoque > 0);
+                }).filter(p => p !== null);
 
-                const produtoAtual = produtos.find(p => p.nome === nomeUrl);
-                
-                if(produtoAtual) {
-                    let temDesconto = produtoAtual.precoAntigo > produtoAtual.preco;
-                    let htmlPrecoAntigo = '';
-                    let htmlEtiqueta = '';
+                const produto = produtos.find(p => p.nome === nomeProduto);
 
-                    if (temDesconto) {
-                        let descontoPorcento = Math.round(((produtoAtual.precoAntigo - produtoAtual.preco) / produtoAtual.precoAntigo) * 100);
-                        htmlPrecoAntigo = `<div class="preco-cortado">De: R$ ${produtoAtual.precoAntigo.toFixed(2).replace('.',',')}</div>`;
-                        htmlEtiqueta = `<div class="etiqueta-off">${descontoPorcento}% OFF</div>`;
-                    }
-                    
-                    document.getElementById('detalhe-produto').innerHTML = `
-                        <div class="img-produto">
-                            ${htmlEtiqueta}
-                            <img src="${produtoAtual.img}" onerror="this.src='padrao.png'">
-                        </div>
-                        <div class="info-produto">
-                            <h1>${produtoAtual.nome}</h1>
-                            <p class="descricao">${produtoAtual.descricao}</p>
-                            ${htmlPrecoAntigo}
-                            <div class="preco">R$ ${produtoAtual.preco.toFixed(2).replace('.',',')}</div>
-                            <button onclick="adicionarAoCarrinho('${produtoAtual.nome}', ${produtoAtual.preco}, '${produtoAtual.img}')" class="btn-add">
-                                <i class="fas fa-cart-plus"></i> Adicionar ao Carrinho
-                            </button>
-                        </div>
-                    `;
-
-                    const recomendados = produtos.filter(p => p.nome !== nomeUrl).slice(0, 4);
-                    document.getElementById('grid-recomendados').innerHTML = recomendados.map(p => `
-                        <a href="produto.html?nome=${encodeURIComponent(p.nome)}" class="cartao-rec">
-                            <img src="${p.img}" onerror="this.src='padrao.png'">
-                            <h4>${p.nome}</h4>
-                            <p>R$ ${p.preco.toFixed(2).replace('.',',')}</p>
-                        </a>
-                    `).join('');
-                } else {
-                    document.getElementById('detalhe-produto').innerHTML = "<h1 style='width:100%; text-align:center;'>Produto não encontrado ou sem estoque.</h1>";
+                if (!produto) {
+                    document.getElementById('detalhes-produto').innerHTML = '<p>Produto não encontrado ou sem estoque.</p>';
+                    return;
                 }
+
+                let imgProduto = produto.img;
+                if (imgProduto !== '' && !imgProduto.startsWith('http') && !imgProduto.startsWith('img/')) {
+                    imgProduto = 'img/' + imgProduto;
+                }
+                if (imgProduto === '') imgProduto = 'padrao.png';
+
+                let temDesconto = produto.precoAntigo > produto.preco;
+                let htmlPrecoAntigo = temDesconto ? `<p style="text-decoration: line-through; color: #999;">De: R$ ${produto.precoAntigo.toFixed(2).replace('.', ',')}</p>` : '';
+
+                document.getElementById('detalhes-produto').innerHTML = `
+                    <div style="display: flex; flex-wrap: wrap; gap: 30px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                        <div style="flex: 1; min-width: 300px;">
+                            <img src="${imgProduto}" alt="${produto.nome}" onerror="this.src='padrao.png'" style="width: 100%; border-radius: 8px; object-fit: contain; max-height: 400px;">
+                        </div>
+                        <div style="flex: 1; min-width: 300px; display: flex; flex-direction: column; justify-content: center;">
+                            <h2 style="color: var(--verde-escuro); margin-bottom: 10px;">${produto.nome}</h2>
+                            <p style="color: #666; margin-bottom: 20px;"><strong>Categoria:</strong> ${produto.categoria} ${produto.subcategoria ? `> ${produto.subcategoria}` : ''}</p>
+                            ${htmlPrecoAntigo}
+                            <h3 style="color: var(--verde-destaque); font-size: 2em; margin-bottom: 20px;">R$ ${produto.preco.toFixed(2).replace('.', ',')}</h3>
+                            <p style="margin-bottom: 20px;">${produto.descricao}</p>
+                            <p style="margin-bottom: 20px; color: ${produto.estoque > 0 ? 'green' : 'red'};"><strong>Estoque:</strong> ${produto.estoque} unidades</p>
+                            <button onclick="adicionarAoCarrinho('${produto.nome}', ${produto.preco})" style="background: var(--verde-destaque); color: white; padding: 15px; border: none; border-radius: 5px; font-size: 1.2em; cursor: pointer; font-weight: bold;">Adicionar ao Carrinho</button>
+                        </div>
+                    </div>
+                `;
+
             } catch (erro) {
-                console.error(erro);
+                console.error("Erro ao carregar o produto:", erro);
+                document.getElementById('detalhes-produto').innerHTML = '<p>Erro ao carregar os detalhes do produto.</p>';
             }
         }
-        window.onload = () => { carregar(); atualizarContador(); };
+
+        function adicionarAoCarrinho(nome, preco) {
+            let carrinho = JSON.parse(localStorage.getItem('carrinho')) || [];
+            carrinho.push({ nome: nome, preco: preco });
+            localStorage.setItem('carrinho', JSON.stringify(carrinho));
+            atualizarContador();
+            alert(`${nome} adicionado ao carrinho!`);
+        }
+
+        window.onload = () => { carregarProduto(); atualizarContador(); };
     </script>
 </body>
 </html>
