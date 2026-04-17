@@ -100,6 +100,65 @@
         .btn-aba { padding: 15px 40px; font-size: 1.2em; font-weight: bold; border: 2px solid var(--verde-escuro); border-radius: 8px; cursor: pointer; background: white; color: var(--verde-escuro); transition: 0.3s; }
         .btn-aba.ativo { background: var(--verde-escuro); color: white; }
         .btn-aba:hover { background: var(--verde-escuro); color: white; opacity: 0.9; }
+
+        /* --- LAYOUT ESTILO MERCADO LIVRE --- */
+        .layout-catalogo { 
+            display: flex; 
+            max-width: 1200px; 
+            margin: 20px auto; 
+            padding: 0 20px; 
+            gap: 30px; 
+            align-items: flex-start; 
+        }
+        
+        .menu-lateral-filtros { 
+            width: 250px; 
+            flex-shrink: 0; 
+            background: white; 
+            padding: 20px; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05); 
+        }
+        
+        .menu-lateral-filtros h3 { 
+            margin-top: 0; 
+            color: var(--verde-escuro); 
+            border-bottom: 2px solid #eee; 
+            padding-bottom: 10px; 
+            margin-bottom: 15px; 
+        }
+        
+        .lista-filtros { list-style: none; padding: 0; margin: 0; }
+        .lista-filtros li { margin-bottom: 10px; }
+        
+        .btn-filtro { 
+            width: 100%; 
+            text-align: left; 
+            padding: 12px 15px; 
+            border: none; 
+            background: transparent; 
+            cursor: pointer; 
+            font-size: 1.1em; 
+            color: #555; 
+            border-radius: 5px; 
+            transition: 0.3s; 
+        }
+        
+        .btn-filtro:hover { background: #f0f4f8; color: var(--verde-escuro); }
+        .btn-filtro.ativo { background: var(--verde-escuro); color: white; font-weight: bold; }
+        
+        .conteudo-principal { flex-grow: 1; width: 100%; }
+
+        /* Ajuste do grid para o novo espaço */
+        .grid-produtos { padding: 0; margin: 0; }
+
+        /* Responsividade: No celular a barra lateral vira botões no topo */
+        @media (max-width: 768px) {
+            .layout-catalogo { flex-direction: column; }
+            .menu-lateral-filtros { width: 100%; }
+            .lista-filtros { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; }
+            .btn-filtro { white-space: nowrap; text-align: center; }
+        }
     </style>
 </head>
 <body>
@@ -122,20 +181,31 @@
         </div>
     </div>
 
-     <main>
-        <a href="index.html" class="btn-voltar">← Voltar para a Loja</a>
-
-        <div class="container-abas">
-            <button onclick="mudarCatalogo('maquinas')" id="btn-maquinas" class="btn-aba ativo">CATÁLOGO DE MÁQUINAS</button>
-            <button onclick="mudarCatalogo('pecas')" id="btn-pecas" class="btn-aba">CATÁLOGO DE PEÇAS</button>
+    <main>
+        <div style="max-width: 1200px; margin: 0 auto; padding: 20px 20px 0 20px;">
+            <a href="index.html" class="btn-voltar">← Voltar para a Loja</a>
         </div>
 
-        <div id="sessao-maquinas" style="display: block;">
-            <div id="lista-maquinas" class="grid-produtos"></div>
-        </div>
+        <div class="layout-catalogo">
+            <aside class="menu-lateral-filtros">
+                <h3>Categorias</h3>
+                <ul class="lista-filtros">
+                    <li><button onclick="mudarCatalogo('maquinas')" id="btn-maquinas" class="btn-filtro ativo">Máquinas e Ferramentas</button></li>
+                    <li><button onclick="mudarCatalogo('pecas')" id="btn-pecas" class="btn-filtro">Peças de Reposição</button></li>
+                </ul>
+            </aside>
 
-        <div id="sessao-pecas" style="display: none;">
-            <div id="container-grupos-pecas" style="padding: 0 20px; max-width: 800px; margin: 0 auto;"></div>
+            <section class="conteudo-principal">
+                
+                <div id="sessao-maquinas" style="display: block;">
+                    <div id="lista-maquinas" class="grid-produtos"></div>
+                </div>
+
+                <div id="sessao-pecas" style="display: none;">
+                    <div id="container-grupos-pecas"></div>
+                </div>
+
+            </section>
         </div>
     </main>
 
