@@ -94,6 +94,12 @@
         .conteudo-subcategoria.ativo { display: flex; flex-direction: column; gap: 12px; }
         .item-peca-simples { display: flex; justify-content: space-between; align-items: center; background: white; padding: 15px; border: 1px solid #eee; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         @media (max-width: 600px) { .item-peca-simples { flex-direction: column; align-items: flex-start; gap: 10px; } .item-peca-simples > div { width: 100%; } .item-peca-simples .direita { text-align: left !important; } }
+
+        /* --- ESTILO DAS ABAS DE SEPARAÇÃO --- */
+        .container-abas { display: flex; justify-content: center; gap: 15px; margin: 30px 0; flex-wrap: wrap; }
+        .btn-aba { padding: 15px 40px; font-size: 1.2em; font-weight: bold; border: 2px solid var(--verde-escuro); border-radius: 8px; cursor: pointer; background: white; color: var(--verde-escuro); transition: 0.3s; }
+        .btn-aba.ativo { background: var(--verde-escuro); color: white; }
+        .btn-aba:hover { background: var(--verde-escuro); color: white; opacity: 0.9; }
     </style>
 </head>
 <body>
@@ -116,14 +122,21 @@
         </div>
     </div>
 
-    <main>
+     <main>
         <a href="index.html" class="btn-voltar">← Voltar para a Loja</a>
 
-        <h2 class="secao-titulo">Máquinas e Ferramentas</h2>
-        <div id="lista-maquinas" class="grid-produtos"></div>
+        <div class="container-abas">
+            <button onclick="mudarCatalogo('maquinas')" id="btn-maquinas" class="btn-aba ativo">CATÁLOGO DE MÁQUINAS</button>
+            <button onclick="mudarCatalogo('pecas')" id="btn-pecas" class="btn-aba">CATÁLOGO DE PEÇAS</button>
+        </div>
 
-        <h2 class="secao-titulo" style="margin-top: 50px;">Catálogo de Peças</h2>
-        <div id="container-grupos-pecas" style="padding: 0 20px;"></div>
+        <div id="sessao-maquinas" style="display: block;">
+            <div id="lista-maquinas" class="grid-produtos"></div>
+        </div>
+
+        <div id="sessao-pecas" style="display: none;">
+            <div id="container-grupos-pecas" style="padding: 0 20px; max-width: 800px; margin: 0 auto;"></div>
+        </div>
     </main>
 
     <script>
@@ -133,6 +146,15 @@
             let carrinho = JSON.parse(localStorage.getItem('carrinho')) || [];
             let contador = document.getElementById('contador-carrinho');
             if(contador) contador.innerText = carrinho.length;
+        }
+
+        // Função que troca entre o catálogo de peças e máquinas
+        function mudarCatalogo(tipo) {
+            document.getElementById('sessao-maquinas').style.display = tipo === 'maquinas' ? 'block' : 'none';
+            document.getElementById('sessao-pecas').style.display = tipo === 'pecas' ? 'block' : 'none';
+            
+            document.getElementById('btn-maquinas').classList.toggle('ativo', tipo === 'maquinas');
+            document.getElementById('btn-pecas').classList.toggle('ativo', tipo === 'pecas');
         }
 
         function criarCartao(p) {
@@ -167,11 +189,12 @@
 
                 let produtos = linhas.map(linha => {
                     const col = linha.split(',');
-                    if (col.length < 8) return null;
+                    if (col.length < 4) return null; // Tolerante a colunas vazias
+                    
                     return {
                         nome: col[0] ? col[0].trim() : '',
                         categoria: col[1] ? col[1].trim() : '',
-                        subcategoria: col[2] ? col[2].trim() : 'Outros',
+                        subcategoria: col[2] ? col[2].trim() : '',
                         preco: parseFloat(col[3]) || 0,
                         precoAntigo: parseFloat(col[4]) || 0,
                         img: col[5] ? col[5].trim() : '',
@@ -203,8 +226,7 @@
 
                         let htmlGrupos = '';
                         for (let subcat in grupos) {
-                            // Cria um ID limpo sem espaços
-                            let idSubcat = subcat.replace(/\s+/g, '-').toLowerCase();
+                            let idSubcat = subcat.replace(/[^a-zA-Z0-9]/g, '').toLowerCase(); // Garante IDs válidos
                             
                             htmlGrupos += `
                             <div>
@@ -239,7 +261,6 @@
             }
         }
 
-        // Função para abrir/fechar a sanfona de subcategoria
         function abrirSubcategoria(id) {
             const conteudo = document.getElementById(`subcat-${id}`);
             if (conteudo) {
