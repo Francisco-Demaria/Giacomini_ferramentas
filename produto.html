@@ -99,12 +99,14 @@
                     let caminhoImg = colunas[3] || 'padrao.png';
                     if (caminhoImg !== 'padrao.png' && !caminhoImg.startsWith('http') && !caminhoImg.startsWith('img/')) caminhoImg = 'img/' + caminhoImg;
                     return { 
-                        nome: colunas[0], 
-                        preco: parseFloat(colunas[1])||0, 
-                        precoAntigo: parseFloat(colunas[2])||0, 
-                        img: caminhoImg, 
-                        estoque: parseInt(colunas[4])||0, 
-                        descricao: colunas[5]||'Peça com a garantia e precisão que seu equipamento exige.' 
+                        nome: col[0] ? col[0].trim() : '',
+                        categoria: col[1] ? col[1].trim() : '',
+                        subcategoria: col[2] ? col[2].trim() : '', 
+                        preco: parseFloat(col[3]) || 0,
+                        precoAntigo: parseFloat(col[4]) || 0,
+                        img: col[5] ? col[5].trim() : '',
+                        estoque: parseInt(col[6]) || 0,
+                        descricao: col[7] ? col[7].trim() : ''
                     };
                 }).filter(p => p.nome && p.estoque > 0);
 
