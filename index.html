@@ -208,29 +208,24 @@
         <p style="opacity: 0.6; font-size: 0.85em; text-transform: uppercase; letter-spacing: 1px;">© 2026 Giacomini. Todos os direitos reservados.</p>
     </footer>
 
-<script>
+    <script>
         const URL_PLANILHA = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSjwdcNetNoRZzXi20wyCVlMwhQf86ckoI8ZcIDui7wnvQpxUg7NIAio6HEu_CMHqyG1yT4Rcee_q6H/pub?output=csv';
 
-        // Atualizar Número do Carrinho
         function atualizarContador() {
             let carrinho = JSON.parse(localStorage.getItem('carrinho')) || [];
             let contador = document.getElementById('contador-carrinho');
             if(contador) contador.innerText = carrinho.length;
         }
 
-        // Busca
         function fazerBusca() {
             let termo = document.getElementById('input-busca').value;
             if(termo.trim() !== '') window.location.href = 'catalogo.html?busca=' + encodeURIComponent(termo);
         }
 
-        // Menu
         function abrirMenu() { document.getElementById('menu-lateral').classList.add('aberto'); document.getElementById('overlay').style.display = 'block'; }
         function fecharMenu() { document.getElementById('menu-lateral').classList.remove('aberto'); document.getElementById('overlay').style.display = 'none'; }
 
-        // Slider Lateral
-        let slideIndex = 0;
-        let timer;
+        let slideIndex = 0; let timer;
         function mudarSlide(n) {
             let slides = document.querySelectorAll('.slide');
             if(slides.length === 0) return;
@@ -244,7 +239,6 @@
         function resetarTimer() { clearInterval(timer); timer = setInterval(autoSlide, 5000); }
         resetarTimer();
 
-        // Criar Cartão Padrão
         function criarCartao(p) {
             let img = p.img;
             if (img !== '' && !img.startsWith('http') && !img.startsWith('img/')) { img = 'img/' + img; }
@@ -253,25 +247,25 @@
             let temDesconto = p.precoAntigo > p.preco;
             let htmlPrecoAntigo = temDesconto ? `<div class="preco-antigo">De: R$ ${p.precoAntigo.toFixed(2).replace('.',',')}</div>` : `<div class="preco-antigo" style="height:20px;"></div>`;
             let seloHTML = temDesconto ? `<div class="selo-desconto">${Math.round(((p.precoAntigo - p.preco) / p.precoAntigo) * 100)}% OFF</div>` : '';
-            
-            // Etiqueta Máquina/Peça
             let badgeCategoria = p.categoria ? `<span class="badge-categoria" style="position:absolute; top:10px; left:10px; background:var(--verde-escuro); color:white; padding:5px 10px; border-radius:10px; font-size:0.8em; z-index:2;">${p.categoria}</span>` : '';
 
+            // Adicionado estilo para deixar os cartões da Home simétricos também
             return `
-                <a href="produto.html?nome=${encodeURIComponent(p.nome)}" style="text-decoration:none; color:inherit; position:relative; display:block;">
-                    <div class="cartao-produto">
+                <a href="produto.html?nome=${encodeURIComponent(p.nome)}" style="text-decoration:none; color:inherit; position:relative; display:block; height:100%;">
+                    <div class="cartao-produto" style="display: flex; flex-direction: column; height: 100%; justify-content: space-between;">
                         ${badgeCategoria}
                         ${seloHTML}
-                        <img src="${img}" onerror="this.src='padrao.png'" alt="${p.nome}">
-                        <h3>${p.nome}</h3>
-                        ${htmlPrecoAntigo}
-                        <div class="preco-atual">R$ ${p.preco.toFixed(2).replace('.', ',')}</div>
-                        <button class="btn-comprar">Ver Detalhes</button>
+                        <img src="${img}" onerror="this.src='padrao.png'" alt="${p.nome}" style="height: 180px; width: 100%; object-fit: contain; margin-bottom: 15px;">
+                        <h3 style="flex-grow: 1; display: flex; align-items: flex-start; justify-content: center; min-height: 48px; margin: 0 0 10px 0;">${p.nome}</h3>
+                        <div style="width:100%;">
+                            ${htmlPrecoAntigo}
+                            <div class="preco-atual">R$ ${p.preco.toFixed(2).replace('.', ',')}</div>
+                            <button class="btn-comprar" style="width:100%; margin-top:10px;">Ver Detalhes</button>
+                        </div>
                     </div>
                 </a>`;
         }
 
-        // Carregar do CSV Real
         async function carregarDados() {
             try {
                 const resposta = await fetch(URL_PLANILHA);
@@ -280,12 +274,12 @@
 
                 let produtos = linhas.map(linha => {
                     const col = linha.split(',');
-                    if (col.length < 7) return null;
+                    if (col.length < 8) return null; // 8 colunas
 
                     return {
                         nome: col[0] ? col[0].trim() : '',
                         categoria: col[1] ? col[1].trim() : '',
-                        subcategoria: col[2] ? col[2].trim() : '', 
+                        subcategoria: col[2] ? col[2].trim() : '',
                         preco: parseFloat(col[3]) || 0,
                         precoAntigo: parseFloat(col[4]) || 0,
                         img: col[5] ? col[5].trim() : '',
@@ -294,16 +288,13 @@
                     };
                 }).filter(p => p !== null && p.estoque > 0);
 
-                // Destaques (1 a 4)
                 let gridDest = document.getElementById('grid-destaques');
                 if(gridDest) gridDest.innerHTML = produtos.slice(0, 4).map(p => criarCartao(p)).join('');
                 
-                // Lançamentos (Últimos 4 adicionados na planilha)
                 let lancamentos = produtos.slice(-4).reverse();
                 let gridLanc = document.getElementById('grid-lancamentos');
                 if(gridLanc) gridLanc.innerHTML = lancamentos.length > 0 ? lancamentos.map(p => criarCartao(p)).join('') : "<p style='width:100%; text-align:center;'>Nenhum lançamento recente.</p>";
                 
-                // Promoções (Quem tem preço antigo maior que atual)
                 let promocoes = produtos.filter(p => p.precoAntigo > p.preco);
                 let gridProm = document.getElementById('grid-promocoes');
                 if(gridProm) gridProm.innerHTML = promocoes.length > 0 ? promocoes.slice(0, 4).map(p => criarCartao(p)).join('') : "<p style='width:100%; text-align:center;'>Nenhuma oferta ativa no momento.</p>";
