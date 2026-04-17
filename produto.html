@@ -96,7 +96,8 @@
 
                 let produtos = linhas.map(linha => {
                     const col = linha.split(',');
-                    if (col.length < 8) return null; // Puxando as 8 colunas corretamente
+                    // Rebaixamos a exigência para 4 para não quebrar em máquinas sem subcategoria
+                    if (col.length < 4) return null; 
                     
                     return {
                         nome: col[0] ? col[0].trim() : '',
@@ -126,6 +127,9 @@
                 let temDesconto = produto.precoAntigo > produto.preco;
                 let htmlPrecoAntigo = temDesconto ? `<p style="text-decoration: line-through; color: #999;">De: R$ ${produto.precoAntigo.toFixed(2).replace('.', ',')}</p>` : '';
 
+                // Se não tem subcategoria, não mostra a setinha ">"
+                let txtSubcategoria = produto.subcategoria ? ` > ${produto.subcategoria}` : '';
+
                 document.getElementById('detalhes-produto').innerHTML = `
                     <div style="display: flex; flex-wrap: wrap; gap: 30px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
                         <div style="flex: 1; min-width: 300px;">
@@ -133,7 +137,7 @@
                         </div>
                         <div style="flex: 1; min-width: 300px; display: flex; flex-direction: column; justify-content: center;">
                             <h2 style="color: var(--verde-escuro); margin-bottom: 10px;">${produto.nome}</h2>
-                            <p style="color: #666; margin-bottom: 20px;"><strong>Categoria:</strong> ${produto.categoria} ${produto.subcategoria ? `> ${produto.subcategoria}` : ''}</p>
+                            <p style="color: #666; margin-bottom: 20px;"><strong>Categoria:</strong> ${produto.categoria}${txtSubcategoria}</p>
                             ${htmlPrecoAntigo}
                             <h3 style="color: var(--verde-destaque); font-size: 2em; margin-bottom: 20px;">R$ ${produto.preco.toFixed(2).replace('.', ',')}</h3>
                             <p style="margin-bottom: 20px;">${produto.descricao}</p>
