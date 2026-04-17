@@ -283,13 +283,14 @@
                     if (col.length < 7) return null;
 
                     return {
-                        nome: col[0].trim(),
-                        categoria: col[1].trim(),     // MÁQUINA ou PEÇA
-                        preco: parseFloat(col[2]),
-                        precoAntigo: parseFloat(col[3]) || 0,
-                        img: col[4].trim(),
-                        estoque: parseInt(col[5]),
-                        descricao: col[6].trim()
+                        nome: col[0] ? col[0].trim() : '',
+                        categoria: col[1] ? col[1].trim() : '',
+                        subcategoria: col[2] ? col[2].trim() : '', 
+                        preco: parseFloat(col[3]) || 0,
+                        precoAntigo: parseFloat(col[4]) || 0,
+                        img: col[5] ? col[5].trim() : '',
+                        estoque: parseInt(col[6]) || 0,
+                        descricao: col[7] ? col[7].trim() : ''
                     };
                 }).filter(p => p !== null && p.estoque > 0);
 
