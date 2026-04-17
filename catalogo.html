@@ -86,6 +86,14 @@
         /* --- ESTILO DOS GRUPOS DE PEÇAS --- */
         .grupo-pecas { max-width: 800px; margin: 0 auto 30px auto; width: 100%; }
         .titulo-grupo { color: var(--verde-escuro, #333); border-bottom: 2px solid #ddd; padding-bottom: 5px; margin-bottom: 15px; text-align: left; }
+
+        /* --- ESTILO DA SANFONA DE SUBCATEGORIAS --- */
+        .sanfona-subcategoria { background: #f0f4f8; border: 1px solid #cce0f5; padding: 15px 20px; cursor: pointer; font-weight: bold; font-size: 1.2em; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; color: var(--verde-escuro); transition: 0.3s; }
+        .sanfona-subcategoria:hover { background: #e2ecf5; }
+        .conteudo-subcategoria { display: none; padding: 10px 15px; margin-bottom: 20px; border-left: 3px solid var(--verde-destaque); }
+        .conteudo-subcategoria.ativo { display: flex; flex-direction: column; gap: 12px; }
+        .item-peca-simples { display: flex; justify-content: space-between; align-items: center; background: white; padding: 15px; border: 1px solid #eee; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        @media (max-width: 600px) { .item-peca-simples { flex-direction: column; align-items: flex-start; gap: 10px; } .item-peca-simples > div { width: 100%; } .item-peca-simples .direita { text-align: left !important; } }
     </style>
 </head>
 <body>
@@ -118,7 +126,7 @@
         <div id="container-grupos-pecas" style="padding: 0 20px;"></div>
     </main>
 
-   <script>
+    <script>
         const URL_PLANILHA = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSjwdcNetNoRZzXi20wyCVlMwhQf86ckoI8ZcIDui7wnvQpxUg7NIAio6HEu_CMHqyG1yT4Rcee_q6H/pub?output=csv';
 
         function atualizarContador() {
@@ -159,17 +167,16 @@
 
                 let produtos = linhas.map(linha => {
                     const col = linha.split(',');
-                    if (col.length < 8) return null; // Agora exigimos 8 colunas (A até H)
-                    
+                    if (col.length < 8) return null;
                     return {
                         nome: col[0] ? col[0].trim() : '',
                         categoria: col[1] ? col[1].trim() : '',
-                        subcategoria: col[2] ? col[2].trim() : 'Outros', // COLUNA C: TIPO DE PEÇA
-                        preco: parseFloat(col[3]) || 0,                  // COLUNA D: PREÇO
-                        precoAntigo: parseFloat(col[4]) || 0,            // COLUNA E: PREÇO ANTIGO
-                        img: col[5] ? col[5].trim() : '',                // COLUNA F: IMAGEM
-                        estoque: parseInt(col[6]) || 0,                  // COLUNA G: ESTOQUE
-                        descricao: col[7] ? col[7].trim() : ''           // COLUNA H: DESCRIÇÃO
+                        subcategoria: col[2] ? col[2].trim() : 'Outros',
+                        preco: parseFloat(col[3]) || 0,
+                        precoAntigo: parseFloat(col[4]) || 0,
+                        img: col[5] ? col[5].trim() : '',
+                        estoque: parseInt(col[6]) || 0,
+                        descricao: col[7] ? col[7].trim() : ''
                     };
                 }).filter(p => p !== null && p.estoque > 0);
 
@@ -179,47 +186,45 @@
                 const containerMaquinas = document.getElementById('lista-maquinas');
                 const containerPecas = document.getElementById('container-grupos-pecas');
 
-                // 1. Renderiza as Máquinas
+                // 1. Renderiza Máquinas
                 if (containerMaquinas) {
                     containerMaquinas.innerHTML = maquinas.length > 0 ? maquinas.map(p => criarCartao(p)).join('') : '<p style="width:100%; text-align:center;">Nenhuma máquina encontrada.</p>';
                 }
 
-                // 2. Agrupa e Renderiza as Peças
+                // 2. Renderiza Peças (Sanfona de Subcategorias)
                 if (containerPecas) {
                     if (pecas.length > 0) {
-                        // Agrupa as peças pela coluna Subcategoria (Anel, Rolamento, etc)
                         let grupos = {};
                         pecas.forEach(p => {
-                            if (!grupos[p.subcategoria]) grupos[p.subcategoria] = [];
-                            grupos[p.subcategoria].push(p);
+                            let sub = p.subcategoria === '' ? 'Outras Peças' : p.subcategoria;
+                            if (!grupos[sub]) grupos[sub] = [];
+                            grupos[sub].push(p);
                         });
 
                         let htmlGrupos = '';
-                        // Cria a sanfona separada por grupos
                         for (let subcat in grupos) {
+                            // Cria um ID limpo sem espaços
+                            let idSubcat = subcat.replace(/\s+/g, '-').toLowerCase();
+                            
                             htmlGrupos += `
-                            <div class="grupo-pecas">
-                                <h3 class="titulo-grupo">${subcat}</h3>
-                                <div class="lista-pecas">
-                                    ${grupos[subcat].map((p, index) => {
-                                        let idUnico = subcat.replace(/\s+/g, '') + index;
-                                        return `
-                                        <div class="peca-item">
-                                            <div class="peca-cabecalho" onclick="abrirPeca('${idUnico}')" id="cabecalho-${idUnico}">
-                                                <span>${p.nome}</span>
-                                                <span><strong style="color:var(--verde-destaque); margin-right:15px;">R$ ${p.preco.toFixed(2).replace('.', ',')}</strong> <span class="seta">▼</span></span>
+                            <div>
+                                <div class="sanfona-subcategoria" onclick="abrirSubcategoria('${idSubcat}')">
+                                    <span>⚙️ ${subcat} <span style="font-size:0.8em; font-weight:normal; color:#666;">(${grupos[subcat].length} itens)</span></span>
+                                    <span>▼</span>
+                                </div>
+                                <div class="conteudo-subcategoria" id="subcat-${idSubcat}">
+                                    ${grupos[subcat].map(p => `
+                                        <div class="item-peca-simples">
+                                            <div>
+                                                <strong style="font-size:1.1em;">${p.nome}</strong><br>
+                                                <span style="color:#666; font-size: 0.9em;">Estoque: ${p.estoque} | ${p.descricao}</span>
                                             </div>
-                                            <div class="peca-conteudo" id="conteudo-${idUnico}">
-                                                <div class="peca-info">
-                                                    <div>
-                                                        <p><strong>Estoque:</strong> ${p.estoque} unidades</p>
-                                                        <p><strong>Detalhes:</strong> ${p.descricao}</p>
-                                                    </div>
-                                                    <a href="produto.html?nome=${encodeURIComponent(p.nome)}" class="btn-comprar" style="text-decoration:none; display:inline-block; margin-top:10px;">Ver Peça</a>
-                                                </div>
+                                            <div class="direita" style="text-align: right; min-width: 120px;">
+                                                <strong style="color:var(--verde-destaque); display:block; margin-bottom:8px; font-size:1.2em;">R$ ${p.preco.toFixed(2).replace('.', ',')}</strong>
+                                                <a href="produto.html?nome=${encodeURIComponent(p.nome)}" class="btn-comprar" style="padding: 8px 15px; font-size: 0.9em; text-decoration:none; display:inline-block;">Ver Detalhes</a>
                                             </div>
-                                        </div>`
-                                    }).join('')}
+                                        </div>
+                                    `).join('')}
                                 </div>
                             </div>`;
                         }
@@ -234,12 +239,11 @@
             }
         }
 
-        function abrirPeca(id) {
-            const conteudo = document.getElementById(`conteudo-${id}`);
-            const cabecalho = document.getElementById(`cabecalho-${id}`);
-            if (conteudo && cabecalho) {
+        // Função para abrir/fechar a sanfona de subcategoria
+        function abrirSubcategoria(id) {
+            const conteudo = document.getElementById(`subcat-${id}`);
+            if (conteudo) {
                 conteudo.classList.toggle('ativo');
-                cabecalho.classList.toggle('aberto');
             }
         }
 
